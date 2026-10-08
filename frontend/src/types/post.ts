@@ -8,6 +8,23 @@ export interface PostMedia {
   sort_order: number;
 }
 
+export interface PostComment {
+  id: number;
+  post_id: number;
+  user_id: number;
+  user: User;
+  body: string;
+  created_at: string;
+}
+
+export interface PostReaction {
+  id: number;
+  post_id: number;
+  user_id: number;
+  emoji: "🔥" | "💪" | "❤️" | "🙌" | "😂";
+  created_at: string;
+}
+
 export interface Post {
   id: number;
   user_id: number;
@@ -16,4 +33,6 @@ export interface Post {
   created_at: string;
   media: PostMedia[];
   lifts: Lift[];
+  comments: PostComment[];
+  reactions: PostReaction[];
 }

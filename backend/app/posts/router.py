@@ -9,8 +9,8 @@ from app.database.database import get_db
 from app.database.models import User
 from app.lifts.schemas import LiftCreate
 from app.posts.repository import PostRepository
-from app.posts.schemas import PostRead
-from app.posts.service import create_post, delete_post
+from app.posts.schemas import CommentCreate, CommentRead, PostRead, ReactionCreate, ReactionState
+from app.posts.service import create_comment, create_post, delete_post, toggle_post_reaction
 
 
 router = APIRouter(prefix="/posts", tags=["posts"], dependencies=[Depends(get_current_user)])
@@ -27,6 +27,26 @@ def post_detail(post_id: int, db: Session = Depends(get_db)):
     if post is None:
         raise HTTPException(status_code=404, detail="Post not found.")
     return post
+
+
+@router.post("/{post_id}/comments", response_model=CommentRead, status_code=status.HTTP_201_CREATED)
+def comment_on_post(
+    post_id: int,
+    payload: CommentCreate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    return create_comment(db, post_id, user, payload.body)
+
+
+@router.post("/{post_id}/reaction", response_model=ReactionState)
+def react_to_post(
+    post_id: int,
+    payload: ReactionCreate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> ReactionState:
+    return ReactionState(reactions=toggle_post_reaction(db, post_id, user, payload.emoji))
 
 
 @router.post("", response_model=PostRead, status_code=status.HTTP_201_CREATED)

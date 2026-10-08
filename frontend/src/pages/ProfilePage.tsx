@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CalendarDays, Dumbbell } from "lucide-react";
 import { useRoute } from "wouter";
+import { deletePost } from "../api/posts";
 import { getUser, getUserPosts } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 import Avatar from "../components/Avatar";
@@ -16,6 +17,8 @@ export default function ProfilePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -35,6 +38,22 @@ export default function ProfilePage() {
   const joinedDate = profile?.created_at
     ? new Date(profile.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" })
     : "";
+  const isOwnProfile = profile?.username === signedInUser?.username;
+
+  async function handleDeletePost(postId: number) {
+    if (!window.confirm("Delete this post? This cannot be undone.")) return;
+    setDeletingPostId(postId);
+    setDeleteError("");
+    try {
+      await deletePost(postId);
+      setPosts((current) => current.filter((post) => post.id !== postId));
+      setProfile((current) => current ? { ...current, post_count: Math.max(0, current.post_count - 1) } : current);
+    } catch (deleteFailure) {
+      setDeleteError(deleteFailure instanceof Error ? deleteFailure.message : "Post could not be deleted.");
+    } finally {
+      setDeletingPostId(null);
+    }
+  }
 
   return (
     <section className="page-column profile-page">
@@ -49,8 +68,9 @@ export default function ProfilePage() {
       <div className="profile-post-heading"><span className="eyebrow">SESSION LOG</span><span>{profile?.username === signedInUser?.username ? "YOUR POSTS" : "POSTS"}</span></div>
       {loading && <div className="state-message">Loading profile<span className="loading-dots">...</span></div>}
       {!loading && error && <div className="state-message state-error" role="alert">{error}</div>}
+      {!loading && deleteError && <div className="state-message state-error" role="alert">{deleteError}</div>}
       {!loading && !error && posts.length === 0 && <div className="profile-empty"><Dumbbell size={20} /><span>No sessions posted yet.</span></div>}
-      {!loading && !error && posts.length > 0 && <div className="post-list">{posts.map((post) => <PostCard post={post} key={post.id} />)}</div>}
+      {!loading && !error && posts.length > 0 && <div className="post-list">{posts.map((post) => <PostCard post={post} key={post.id} onDelete={isOwnProfile ? () => void handleDeletePost(post.id) : undefined} isDeleting={deletingPostId === post.id} deleteDisabled={deletingPostId !== null} />)}</div>}
     </section>
   );
 }

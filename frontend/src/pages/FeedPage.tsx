@@ -24,6 +24,9 @@ export default function FeedPage() {
 
   useEffect(() => { void loadPosts(); }, []);
 
+  const memberCount = new Set(posts.map((post) => post.user.username)).size;
+  const liftCount = posts.reduce((total, post) => total + post.lifts.length, 0);
+
   return (
     <section className="page-column feed-page">
       <header className="page-heading feed-heading">
@@ -32,6 +35,12 @@ export default function FeedPage() {
           <RotateCw size={17} />
         </button>
       </header>
+
+      {!loading && !error && <div className="feed-summary" aria-label="Feed snapshot">
+        <div className="feed-metric"><span>SESSIONS</span><strong>{String(posts.length).padStart(2, "0")}</strong></div>
+        <div className="feed-metric"><span>MEMBERS</span><strong>{String(memberCount).padStart(2, "0")}</strong></div>
+        <div className="feed-metric"><span>LIFTS LOGGED</span><strong>{String(liftCount).padStart(2, "0")}</strong></div>
+      </div>}
 
       {loading ? <div className="state-message">Gathering the latest sessions<span className="loading-dots">...</span></div> : null}
       {!loading && error && <div className="state-message state-error" role="alert">{error}<button className="text-button" type="button" onClick={() => void loadPosts()}>Try again</button></div>}

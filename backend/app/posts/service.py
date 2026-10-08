@@ -2,7 +2,7 @@ from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app.config.settings import settings
-from app.database.models import Lift, Post, PostMedia, User
+from app.database.models import Comment, Lift, Post, PostMedia, PostReaction, User
 from app.lifts.schemas import LiftCreate
 from app.media.service import StoredMedia, store_upload
 from app.media.storage import delete_file
@@ -61,3 +61,30 @@ def delete_post(db: Session, post_id: int, user: User) -> None:
     PostRepository.delete(db, post)
     for file_path in file_paths:
         delete_file(settings.upload_dir, file_path)
+
+
+def create_comment(db: Session, post_id: int, user: User, body: str) -> Comment:
+    normalized_body = body.strip()
+    if not normalized_body:
+        raise HTTPException(status_code=422, detail="Comment cannot be empty.")
+    if PostRepository.get_by_id(db, post_id) is None:
+        raise HTTPException(status_code=404, detail="Post not found.")
+    return PostRepository.create_comment(
+        db,
+        Comment(post_id=post_id, user_id=user.id, body=normalized_body, user=user),
+    )
+
+
+def toggle_post_reaction(db: Session, post_id: int, user: User, emoji: str) -> list[PostReaction]:
+    if PostRepository.get_by_id(db, post_id) is None:
+        raise HTTPException(status_code=404, detail="Post not found.")
+
+    reaction = PostRepository.get_reaction(db, post_id, user.id)
+    if reaction is not None and reaction.emoji == emoji:
+        db.delete(reaction)
+    elif reaction is not None:
+        reaction.emoji = emoji
+    else:
+        db.add(PostReaction(post_id=post_id, user_id=user.id, emoji=emoji))
+    db.commit()
+    return PostRepository.list_reactions(db, post_id)

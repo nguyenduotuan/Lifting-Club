@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
@@ -21,6 +21,8 @@ class User(Base):
     profile_image: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     posts: Mapped[list["Post"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    comments: Mapped[list["Comment"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    reactions: Mapped[list["PostReaction"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
 class Post(Base):
@@ -35,6 +37,10 @@ class Post(Base):
         back_populates="post", cascade="all, delete-orphan", order_by="PostMedia.sort_order"
     )
     lifts: Mapped[list["Lift"]] = relationship(back_populates="post", cascade="all, delete-orphan")
+    comments: Mapped[list["Comment"]] = relationship(
+        back_populates="post", cascade="all, delete-orphan", order_by="(Comment.created_at, Comment.id)"
+    )
+    reactions: Mapped[list["PostReaction"]] = relationship(back_populates="post", cascade="all, delete-orphan")
 
 
 class PostMedia(Base):
@@ -61,3 +67,28 @@ class Lift(Base):
     unit: Mapped[str] = mapped_column(String(2), default="kg")
     reps: Mapped[int] = mapped_column(Integer)
     post: Mapped[Post] = relationship(back_populates="lifts")
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    body: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
+    post: Mapped[Post] = relationship(back_populates="comments")
+    user: Mapped[User] = relationship(back_populates="comments")
+
+
+class PostReaction(Base):
+    __tablename__ = "post_reactions"
+    __table_args__ = (UniqueConstraint("post_id", "user_id", name="uq_post_reactions_user"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    emoji: Mapped[str] = mapped_column(String(16))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    post: Mapped[Post] = relationship(back_populates="reactions")
+    user: Mapped[User] = relationship(back_populates="reactions")

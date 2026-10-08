@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.database.models import Post
+from app.database.models import Comment, Post, PostReaction
 
 
 def with_post_details(statement):
@@ -9,6 +9,8 @@ def with_post_details(statement):
         selectinload(Post.user),
         selectinload(Post.media),
         selectinload(Post.lifts),
+        selectinload(Post.comments).selectinload(Comment.user),
+        selectinload(Post.reactions),
     )
 
 
@@ -39,6 +41,26 @@ class PostRepository:
         db.commit()
         db.refresh(post)
         return post
+
+    @staticmethod
+    def create_comment(db: Session, comment: Comment) -> Comment:
+        db.add(comment)
+        db.commit()
+        db.refresh(comment)
+        return comment
+
+    @staticmethod
+    def get_reaction(db: Session, post_id: int, user_id: int) -> PostReaction | None:
+        statement = select(PostReaction).where(
+            PostReaction.post_id == post_id,
+            PostReaction.user_id == user_id,
+        )
+        return db.scalar(statement)
+
+    @staticmethod
+    def list_reactions(db: Session, post_id: int) -> list[PostReaction]:
+        statement = select(PostReaction).where(PostReaction.post_id == post_id).order_by(PostReaction.id)
+        return list(db.scalars(statement).all())
 
     @staticmethod
     def delete(db: Session, post: Post) -> None:
