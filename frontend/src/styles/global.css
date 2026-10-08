@@ -1,0 +1,50 @@
+:root {
+  font-family: "DM Sans", "Manrope", sans-serif;
+  color: #e9eeeb;
+  background: #171b1c;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --bg: #171b1c;
+  --surface: #202526;
+  --surface-raised: #252c2d;
+  --line: rgba(222, 233, 228, 0.11);
+  --line-strong: rgba(222, 233, 228, 0.18);
+  --text: #e9eeeb;
+  --muted: #9ca9a4;
+  --quiet: #71807b;
+  --accent: #c9d9d1;
+  --accent-strong: #e6f0eb;
+  --accent-dark: #788e85;
+  --error: #e2a3a1;
+  --display: "Cormorant Garamond", Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+
+html { min-width: 320px; background: var(--bg); }
+
+body { min-width: 320px; min-height: 100vh; margin: 0; background: var(--bg); }
+
+button, input, textarea, select { font: inherit; }
+
+button, a { -webkit-tap-highlight-color: transparent; }
+
+a { color: inherit; text-decoration: none; }
+
+button { color: inherit; }
+
+::selection { color: #1b2220; background: #d3e1d9; }
+
+:focus-visible { outline: 2px solid #d7e8de; outline-offset: 3px; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+.app-loading { display: grid; min-height: 100vh; place-items: center; background: #171b1c; }
+
+.loading-ring { width: 28px; height: 28px; border: 1px solid rgba(217, 232, 224, .24); border-top-color: #d9e8e0; border-radius: 50%; animation: spin .8s linear infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
