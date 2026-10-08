@@ -1,20 +1,20 @@
 :root {
   font-family: "DM Sans", "Manrope", sans-serif;
-  color: #e9eeeb;
-  background: #171b1c;
+  color: #e9eaed;
+  background: #16181c;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --bg: #171b1c;
-  --surface: #202526;
-  --surface-raised: #252c2d;
-  --line: rgba(222, 233, 228, 0.11);
-  --line-strong: rgba(222, 233, 228, 0.18);
-  --text: #e9eeeb;
-  --muted: #9ca9a4;
-  --quiet: #71807b;
-  --accent: #c9d9d1;
-  --accent-strong: #e6f0eb;
-  --accent-dark: #788e85;
+  --bg: #16181c;
+  --surface: #1f2227;
+  --surface-raised: #282b31;
+  --line: rgba(219, 222, 229, 0.11);
+  --line-strong: rgba(219, 222, 229, 0.19);
+  --text: #e9eaed;
+  --muted: #a8abb3;
+  --quiet: #7e828b;
+  --accent: #c5c8cf;
+  --accent-strong: #eef0f3;
+  --accent-dark: #8b909a;
   --error: #e2a3a1;
   --display: "Cormorant Garamond", Georgia, serif;
 }
@@ -33,15 +33,15 @@ a { color: inherit; text-decoration: none; }
 
 button { color: inherit; }
 
-::selection { color: #1b2220; background: #d3e1d9; }
+:selection { color: #16181c; background: #d0d3da; }
 
-:focus-visible { outline: 2px solid #d7e8de; outline-offset: 3px; }
+:focus-visible { outline: 2px solid #d4d7de; outline-offset: 3px; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
-.app-loading { display: grid; min-height: 100vh; place-items: center; background: #171b1c; }
+.app-loading { display: grid; min-height: 100vh; place-items: center; background: var(--bg); }
 
-.loading-ring { width: 28px; height: 28px; border: 1px solid rgba(217, 232, 224, .24); border-top-color: #d9e8e0; border-radius: 50%; animation: spin .8s linear infinite; }
+.loading-ring { width: 28px; height: 28px; border: 1px solid rgba(219, 222, 229, .24); border-top-color: #d4d7de; border-radius: 50%; animation: spin .8s linear infinite; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
