@@ -6,11 +6,17 @@ from app.database.database import get_db
 from app.database.models import User
 from app.posts.repository import PostRepository
 from app.posts.schemas import PostRead
-from app.users.schemas import UserProfile
+from app.users.schemas import UserProfile, UserRead
+from app.users.repository import UserRepository
 from app.users.service import get_profile
 
 
 router = APIRouter(prefix="/users", tags=["users"], dependencies=[Depends(get_current_user)])
+
+
+@router.get("", response_model=list[UserRead])
+def users(db: Session = Depends(get_db)) -> list[User]:
+    return UserRepository.list_all(db)
 
 
 @router.get("/{username}", response_model=UserProfile)

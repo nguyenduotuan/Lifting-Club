@@ -6,6 +6,10 @@ from app.database.models import User
 
 class UserRepository:
     @staticmethod
+    def list_all(db: Session) -> list[User]:
+        return list(db.scalars(select(User).order_by(User.username)).all())
+
+    @staticmethod
     def get_by_username(db: Session, username: str) -> User | None:
         return db.scalar(select(User).where(User.username == username))
 
