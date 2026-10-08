@@ -1,7 +1,6 @@
 import { request } from "./client";
 import type { Post } from "../types/post";
-import type { UserProfile } from "../types/user";
-import type { User } from "../types/user";
+import type { User, UserProfile } from "../types/user";
 
 export function getUsers(): Promise<User[]> {
   return request<User[]>("/users");

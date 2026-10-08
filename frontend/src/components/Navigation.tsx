@@ -1,13 +1,38 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Activity, CircleUserRound, Dumbbell, LogOut, Menu, Plus, X } from "lucide-react";
+import { Activity, CircleUserRound, Dumbbell, LogOut, Menu, Plus, Search, X } from "lucide-react";
+import { getUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
+import type { User } from "../types/user";
 import Avatar from "./Avatar";
 
 export default function Navigation() {
   const { user, signOut } = useAuth();
   const [location, setLocation] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [members, setMembers] = useState<User[]>([]);
+  const [membersLoaded, setMembersLoaded] = useState(false);
+  const [membersLoading, setMembersLoading] = useState(false);
+  const [membersError, setMembersError] = useState("");
+  const [memberQuery, setMemberQuery] = useState("");
+
+  useEffect(() => {
+    if (!menuOpen || membersLoaded) return;
+    let active = true;
+    setMembersError("");
+    setMembersLoading(true);
+    getUsers()
+      .then((nextMembers) => {
+        if (!active) return;
+        setMembers(nextMembers);
+        setMembersLoaded(true);
+      })
+      .catch((loadError) => {
+        if (active) setMembersError(loadError instanceof Error ? loadError.message : "Members could not be loaded.");
+      })
+      .finally(() => active && setMembersLoading(false));
+    return () => { active = false; };
+  }, [menuOpen, membersLoaded]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -25,6 +50,11 @@ export default function Navigation() {
   }
 
   if (!user) return null;
+
+  const normalizedQuery = memberQuery.trim().toLocaleLowerCase();
+  const matchingMembers = members.filter((member) =>
+    `${member.display_name} ${member.username}`.toLocaleLowerCase().includes(normalizedQuery),
+  );
 
   return (
     <>
@@ -58,6 +88,24 @@ export default function Navigation() {
             <CircleUserRound size={19} strokeWidth={1.8} /><span>Profile</span>
           </Link>
         </nav>
+
+        <section className="member-search-section" aria-label="Find members">
+          <label className="member-search-field">
+            <Search size={15} aria-hidden="true" />
+            <input type="search" value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder="Search members" aria-label="Search members" />
+          </label>
+          <div className="member-search-results" aria-live="polite">
+            {membersLoading && <p className="member-search-state">Loading members...</p>}
+            {!membersLoading && membersError && <p className="member-search-state member-search-error">{membersError}</p>}
+            {!membersLoading && !membersError && matchingMembers.map((member) => (
+              <Link href={`/profile/${member.username}`} className="member-search-result" key={member.id} onClick={() => setMenuOpen(false)}>
+                <Avatar username={member.username} displayName={member.display_name} image={member.profile_image} />
+                <span className="member-search-copy"><strong>{member.display_name}</strong><small>@{member.username}</small></span>
+              </Link>
+            ))}
+            {!membersLoading && !membersError && matchingMembers.length === 0 && <p className="member-search-state">No members found.</p>}
+          </div>
+        </section>
 
         <div className="nav-account">
           <Avatar username={user.username} displayName={user.display_name} image={user.profile_image} />
