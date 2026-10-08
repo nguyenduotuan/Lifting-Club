@@ -24,7 +24,7 @@ export default function Navigation() {
     getUsers()
       .then((nextMembers) => {
         if (!active) return;
-        setMembers(nextMembers);
+        setMembers(nextMembers.some((member) => member.id === user?.id) || !user ? nextMembers : [...nextMembers, user]);
         setMembersLoaded(true);
       })
       .catch((loadError) => {
@@ -103,7 +103,7 @@ export default function Navigation() {
                 <span className="member-search-copy"><strong>{member.display_name}</strong><small>@{member.username}</small></span>
               </Link>
             ))}
-            {!membersLoading && !membersError && matchingMembers.length === 0 && <p className="member-search-state">No members found.</p>}
+            {!membersLoading && !membersError && matchingMembers.length === 0 && <p className="member-search-state">{members.length > 0 ? "No matching members." : "No members are available."}</p>}
           </div>
         </section>
 
