@@ -12,12 +12,13 @@ export default function Navigation() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [members, setMembers] = useState<User[]>([]);
   const [membersLoaded, setMembersLoaded] = useState(false);
+  const [membersRetry, setMembersRetry] = useState(0);
   const [membersLoading, setMembersLoading] = useState(false);
   const [membersError, setMembersError] = useState("");
   const [memberQuery, setMemberQuery] = useState("");
 
   useEffect(() => {
-    if (!menuOpen || membersLoaded) return;
+    if (membersLoaded) return;
     let active = true;
     setMembersError("");
     setMembersLoading(true);
@@ -32,7 +33,7 @@ export default function Navigation() {
       })
       .finally(() => active && setMembersLoading(false));
     return () => { active = false; };
-  }, [menuOpen, membersLoaded]);
+  }, [membersLoaded, membersRetry]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -96,7 +97,7 @@ export default function Navigation() {
           </label>
           <div className="member-search-results" aria-live="polite">
             {membersLoading && <p className="member-search-state">Loading members...</p>}
-            {!membersLoading && membersError && <p className="member-search-state member-search-error">{membersError}</p>}
+            {!membersLoading && membersError && <p className="member-search-state member-search-error">{membersError} <button className="text-button" type="button" onClick={() => setMembersRetry((attempt) => attempt + 1)}>Try again</button></p>}
             {!membersLoading && !membersError && matchingMembers.map((member) => (
               <Link href={`/profile/${member.username}`} className="member-search-result" key={member.id} onClick={() => setMenuOpen(false)}>
                 <Avatar username={member.username} displayName={member.display_name} image={member.profile_image} />
