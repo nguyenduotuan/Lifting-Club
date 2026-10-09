@@ -136,6 +136,24 @@ npm run preview
 
 The Vite `/api` and `/uploads` proxy is enabled for `npm run dev`, not preview. Preview serves the frontend only; a deployed setup must reverse-proxy `/api` and `/uploads` to FastAPI on the same origin, or configure `VITE_API_BASE_URL` and backend CORS for the frontend origin.
 
+### Render deployment
+
+For separate Render services, set the frontend service's build-time environment variable to the complete backend API URL, including `/api`:
+
+```text
+VITE_API_BASE_URL=https://YOUR-BACKEND.onrender.com/api
+```
+
+Set these backend environment variables, replacing the frontend URL with the actual Render Static Site URL:
+
+```text
+SESSION_SECRET=<long-random-value>
+SESSION_COOKIE_SECURE=true
+CORS_ORIGINS=https://YOUR-FRONTEND.onrender.com
+```
+
+The frontend service must be rebuilt after changing `VITE_API_BASE_URL`; Vite embeds `VITE_*` values during the build. Do not set it to the frontend URL, add quotes, or leave it blank. A username may contain only lowercase letters, numbers, `_`, `.`, and `-`; spaces and `@` are rejected during registration.
+
 ## Tests
 
 From `backend/` with its virtual environment active:

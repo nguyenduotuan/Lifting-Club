@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     session_secret: str = "development-only-change-this-secret"
     session_max_age_seconds: int = 60 * 60 * 24 * 7
     session_cookie_secure: bool = False
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
     upload_dir: Path = Path(__file__).resolve().parents[2] / "uploads"
     max_upload_size_bytes: int = 25 * 1024 * 1024
 
