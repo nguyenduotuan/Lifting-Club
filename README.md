@@ -144,14 +144,21 @@ For separate Render services, set the frontend service's build-time environment 
 VITE_API_BASE_URL=https://YOUR-BACKEND.onrender.com/api
 ```
 
+Use a Render Postgres database for the backend. Set `DATABASE_URL` to the connection string provided by Render. The backend accepts Render's `postgres://` URL and converts it for the PostgreSQL driver automatically. Do not use the default SQLite URL on Render; Render's service filesystem is ephemeral and a SQLite database there can disappear on redeploy or restart.
+
 Set these backend environment variables, replacing the frontend URL with the actual Render Static Site URL:
 
 ```text
+DATABASE_URL=<Render Postgres connection string>
 SESSION_SECRET=<long-random-value>
 SESSION_COOKIE_SECURE=true
 SESSION_COOKIE_SAMESITE=none
 CORS_ORIGINS=https://YOUR-FRONTEND.onrender.com
 ```
+
+Keep the same `SESSION_SECRET` permanently. Changing it invalidates every existing login session, so users will need to sign in again. `SESSION_COOKIE_SAMESITE=none` and `SESSION_COOKIE_SECURE=true` are required when the frontend and backend are hosted on different sites. The frontend already sends authenticated requests with credentials enabled.
+
+Uploaded media is also stored on the backend filesystem. Use object storage or a persistent disk for `UPLOAD_DIR` if uploaded images and videos must survive Render redeploys.
 
 The frontend service must be rebuilt after changing `VITE_API_BASE_URL`; Vite embeds `VITE_*` values during the build. Do not set it to the frontend URL, add quotes, or leave it blank. A username may contain only lowercase letters, numbers, `_`, `.`, and `-`; spaces and `@` are rejected during registration.
 
