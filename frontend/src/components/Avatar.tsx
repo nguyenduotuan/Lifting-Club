@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { mediaUrl } from "../api/client";
 
 interface AvatarProps {
   username: string;
@@ -11,7 +12,7 @@ interface AvatarProps {
 export default function Avatar({ username, displayName, image, size = "small", linked = false }: AvatarProps) {
   const initials = displayName.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
   const content = image
-    ? <img className={`avatar avatar-${size}`} src={image} alt="" />
+    ? <img className={`avatar avatar-${size}`} src={mediaUrl(image)} alt="" />
     : <span className={`avatar avatar-${size} avatar-fallback`} aria-label={displayName}>{initials || "A"}</span>;
 
   return linked ? <Link href={`/profile/${username}`} className="avatar-link" aria-label={`${displayName}'s profile`}>{content}</Link> : content;

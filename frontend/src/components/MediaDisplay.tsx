@@ -1,4 +1,5 @@
 import type { PostMedia } from "../types/post";
+import { mediaUrl } from "../api/client";
 
 export default function MediaDisplay({ items }: { items: PostMedia[] }) {
   if (items.length === 0) return null;
@@ -8,8 +9,8 @@ export default function MediaDisplay({ items }: { items: PostMedia[] }) {
       {items.map((item) => (
         <div className="media-frame" key={item.id}>
           {item.media_type === "video"
-            ? <video src={item.file_path} controls preload="metadata" />
-            : <img src={item.file_path} alt="Training session" loading="lazy" />}
+            ? <video src={mediaUrl(item.file_path)} controls preload="metadata" />
+            : <img src={mediaUrl(item.file_path)} alt="Training session" loading="lazy" />}
         </div>
       ))}
     </div>

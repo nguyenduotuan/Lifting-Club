@@ -1,4 +1,10 @@
-const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(/\/$/, "");
+export const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "/api").replace(/\/$/, "");
+
+export function mediaUrl(path: string): string {
+  if (/^https?:\/\//i.test(path)) return path;
+  const backendOrigin = API_BASE.replace(/\/api\/?$/, "");
+  return `${backendOrigin}${path.startsWith("/") ? path : `/${path}`}`;
+}
 
 export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
