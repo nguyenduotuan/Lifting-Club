@@ -149,6 +149,7 @@ Set these backend environment variables, replacing the frontend URL with the act
 ```text
 SESSION_SECRET=<long-random-value>
 SESSION_COOKIE_SECURE=true
+SESSION_COOKIE_SAMESITE=none
 CORS_ORIGINS=https://YOUR-FRONTEND.onrender.com
 ```
 
