@@ -122,10 +122,9 @@ export default function ChallengesPage() {
   return <section className="page-column challenges-page">
     <header className="page-heading goals-heading">
       <div><p className="eyebrow">BETTER TOGETHER</p><h1>Challenges<span className="heading-period">.</span></h1><p className="goals-intro">Pick an arena, chase the goal, track it side by side.</p></div>
-      {activeCategory !== "hosted" && <button className="button button-primary" type="button" onClick={() => setShowForm((open) => !open)}><Plus size={16} /> New challenge</button>}
     </header>
 
-    {showForm && <form ref={formRef} className="goal-create-panel" onSubmit={submitChallenge}>
+    {activeCategory === "hosted" && showForm && <form ref={formRef} className="goal-create-panel" onSubmit={submitChallenge}>
       <div className="goal-create-heading"><div><p className="eyebrow">HOST SOMETHING</p><h2>Set the terms of the challenge</h2></div><button className="icon-button" type="button" onClick={() => setShowForm(false)} aria-label="Close challenge form">×</button></div>
       <div className="goal-form-grid">
         <div><label className="field-label" htmlFor="challenge-title">Challenge</label><input id="challenge-title" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="100K meters rowed in May" required maxLength={140} /></div>
@@ -160,12 +159,12 @@ export default function ChallengesPage() {
       <span className="goals-empty-mark"><Trophy size={23} /></span>
       <p className="eyebrow">NO CROWDS YET</p>
       <h2>Start something worth<br />showing up for.</h2>
-      <button className="button button-secondary" type="button" onClick={() => setShowForm(true)}>Host your first challenge <ChevronRight size={16} /></button>
+      {activeCategory === "hosted" && <button className="button button-secondary" type="button" onClick={() => setShowForm(true)}>Host your first challenge <ChevronRight size={16} /></button>}
     </div>}
 
     <nav className="collection-tabs" aria-label="Challenge categories">
-      <button className="collection-tab collection-tab-private" type="button" aria-pressed={activeCategory === "private"} onClick={() => setActiveCategory("private")}>Private <span>{privateChallenges.length}</span></button>
-      <button className="collection-tab collection-tab-public" type="button" aria-pressed={activeCategory === "public"} onClick={() => setActiveCategory("public")}>Public <span>{publicVisible.length}</span></button>
+      <button className="collection-tab collection-tab-private" type="button" aria-pressed={activeCategory === "private"} onClick={() => { setActiveCategory("private"); setShowForm(false); }}>Private <span>{privateChallenges.length}</span></button>
+      <button className="collection-tab collection-tab-public" type="button" aria-pressed={activeCategory === "public"} onClick={() => { setActiveCategory("public"); setShowForm(false); }}>Public <span>{publicVisible.length}</span></button>
       <button className="collection-tab collection-tab-hosted" type="button" aria-pressed={activeCategory === "hosted"} onClick={() => setActiveCategory("hosted")}>Hosted by you <span>{hosted.length}</span></button>
     </nav>
 

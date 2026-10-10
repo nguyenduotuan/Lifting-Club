@@ -63,8 +63,8 @@ export default function FeedPage() {
         )}
         {!loading && !error && posts.length > 0 && <div className="post-list">{posts.map((post, index) => <PostCard post={post} key={post.id} featured={index === 0} />)}</div>}
         {composerOpen && <CreatePostPage embedded onCancel={() => setComposerOpen(false)} onPosted={() => { setComposerOpen(false); void loadPosts(); }} />}
-        {!loading && <div className="feed-create-action"><button className="button button-primary" type="button" onClick={() => setComposerOpen((open) => !open)}><Plus size={16} /> {composerOpen ? "Close post composer" : "New post"}</button></div>}
       </div>
+      <div className="feed-create-action"><button className="button button-primary" type="button" onClick={() => setComposerOpen((open) => !open)} aria-expanded={composerOpen}><Plus size={16} /> {composerOpen ? "Close post composer" : "New post"}</button></div>
     </section>
   );
 }
