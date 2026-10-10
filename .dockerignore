@@ -1,0 +1,8 @@
+.git
+.env
+backend/.venv
+backend/gym_social.db
+backend/uploads
+frontend/node_modules
+frontend/dist
+frontend/.vite

@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -24,3 +25,9 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+if os.getenv("RENDER"):
+    if settings.session_secret == "development-only-change-this-secret":
+        raise RuntimeError("SESSION_SECRET must be set to a stable private value on Render.")
+    if not settings.session_cookie_secure or settings.session_cookie_samesite.lower() != "none":
+        raise RuntimeError("Render requires SESSION_COOKIE_SECURE=true and SESSION_COOKIE_SAMESITE=none.")

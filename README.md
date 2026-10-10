@@ -138,29 +138,30 @@ The Vite `/api` and `/uploads` proxy is enabled for `npm run dev`, not preview. 
 
 ### Render deployment
 
-For separate Render services, set the frontend service's build-time environment variable to the complete backend API URL, including `/api`:
+This repository includes a root `Dockerfile` that builds the React frontend and serves it from the FastAPI web service. Deploy one Render Web Service from the repository root using the Docker runtime. The resulting routes are same-origin:
 
 ```text
-VITE_API_BASE_URL=https://YOUR-BACKEND.onrender.com/api
+https://YOUR-APP.onrender.com           React frontend
+https://YOUR-APP.onrender.com/api       FastAPI API
+https://YOUR-APP.onrender.com/uploads   Uploaded media
 ```
 
-Use a Render Postgres database for the backend. Set `DATABASE_URL` to the connection string provided by Render. The backend accepts Render's `postgres://` URL and converts it for the PostgreSQL driver automatically. Do not use the default SQLite URL on Render; Render's service filesystem is ephemeral and a SQLite database there can disappear on redeploy or restart.
-
-Set these backend environment variables, replacing the frontend URL with the actual Render Static Site URL:
+Create a Render Postgres database and set these Web Service environment variables:
 
 ```text
 DATABASE_URL=<Render Postgres connection string>
 SESSION_SECRET=<long-random-value>
 SESSION_COOKIE_SECURE=true
 SESSION_COOKIE_SAMESITE=none
-CORS_ORIGINS=https://YOUR-FRONTEND.onrender.com
 ```
 
-Keep the same `SESSION_SECRET` permanently. Changing it invalidates every existing login session, so users will need to sign in again. `SESSION_COOKIE_SAMESITE=none` and `SESSION_COOKIE_SECURE=true` are required when the frontend and backend are hosted on different sites. The frontend already sends authenticated requests with credentials enabled.
+Set the Render health check path to `/api/health`. The Docker build uses `VITE_API_BASE_URL=/api`, so no separate frontend service or frontend API URL is needed. Keep the same `SESSION_SECRET` permanently; changing it invalidates existing sessions.
 
-Uploaded media is also stored on the backend filesystem. Use object storage or a persistent disk for `UPLOAD_DIR` if uploaded images and videos must survive Render redeploys.
+Do not use the default SQLite URL on Render; the service filesystem is ephemeral. Uploaded media also needs a Render persistent disk or object storage if it must survive redeploys. If using a persistent disk, set `UPLOAD_DIR` to its mounted path.
 
-The frontend service must be rebuilt after changing `VITE_API_BASE_URL`; Vite embeds `VITE_*` values during the build. Do not set it to the frontend URL, add quotes, or leave it blank. A username may contain only lowercase letters, numbers, `_`, `.`, and `-`; spaces and `@` are rejected during registration.
+The one-service deployment keeps the frontend and API on the same origin, so browser third-party-cookie restrictions do not affect authentication. `CORS_ORIGINS` can remain at its default because browser requests are same-origin.
+
+The frontend must be rebuilt after changing its API base URL; Vite embeds `VITE_*` values during the build. A username may contain only lowercase letters, numbers, `_`, `.`, and `-`; spaces and `@` are rejected during registration.
 
 ## Tests
 

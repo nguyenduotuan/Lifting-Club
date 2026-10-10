@@ -1,9 +1,11 @@
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
+from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.responses import FileResponse
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.auth.router import router as auth_router
@@ -13,6 +15,9 @@ from app.database.migrations import migrate_lift_weights
 from app.database import models
 from app.posts.router import router as posts_router
 from app.users.router import router as users_router
+
+
+FRONTEND_DIR = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 
 
 @asynccontextmanager
@@ -43,3 +48,18 @@ app.include_router(users_router, prefix="/api")
 app.include_router(posts_router, prefix="/api")
 app.get("/api/health", tags=["health"])(lambda: {"status": "ok"})
 app.mount("/uploads", StaticFiles(directory=settings.upload_dir, check_dir=False), name="uploads")
+
+
+@app.get("/{full_path:path}", include_in_schema=False)
+def serve_frontend(full_path: str) -> FileResponse:
+    index_file = FRONTEND_DIR / "index.html"
+    if not index_file.is_file():
+        raise HTTPException(status_code=404, detail="Frontend build not found.")
+
+    requested_file = (FRONTEND_DIR / full_path).resolve()
+    try:
+        requested_file.relative_to(FRONTEND_DIR.resolve())
+    except ValueError:
+        return FileResponse(index_file)
+
+    return FileResponse(requested_file if requested_file.is_file() else index_file)
