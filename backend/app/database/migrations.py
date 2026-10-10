@@ -35,7 +35,7 @@ def migrate_lift_weights(db_engine: Engine = engine) -> None:
 
 
 def migrate_post_activity(db_engine: Engine = engine) -> None:
-    if db_engine.dialect.name != "sqlite":
+    if db_engine.dialect.name not in {"sqlite", "postgresql"}:
         return
 
     activity_columns = {
@@ -46,6 +46,20 @@ def migrate_post_activity(db_engine: Engine = engine) -> None:
         "pace_seconds_per_unit": "FLOAT",
     }
     with db_engine.begin() as connection:
+        if db_engine.dialect.name == "postgresql":
+            postgres_types = {
+                "activity_name": "VARCHAR(100)",
+                "distance": "DOUBLE PRECISION",
+                "distance_unit": "VARCHAR(2)",
+                "duration_seconds": "INTEGER",
+                "pace_seconds_per_unit": "DOUBLE PRECISION",
+            }
+            for name, column_type in postgres_types.items():
+                connection.exec_driver_sql(
+                    f"ALTER TABLE posts ADD COLUMN IF NOT EXISTS {name} {column_type}"
+                )
+            return
+
         columns = {column[1] for column in connection.exec_driver_sql("PRAGMA table_info(posts)").fetchall()}
         for name, column_type in activity_columns.items():
             if name not in columns:
