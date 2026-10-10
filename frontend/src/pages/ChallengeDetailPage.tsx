@@ -5,6 +5,7 @@ import { deleteChallenge, getChallenge, inviteToChallenge, respondToChallenge, u
 import { getUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 import Avatar from "../components/Avatar";
+import MemberPicker from "../components/MemberPicker";
 import type { Challenge } from "../types/challenge";
 import type { User } from "../types/user";
 
@@ -21,7 +22,7 @@ export default function ChallengeDetailPage() {
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [members, setMembers] = useState<User[]>([]);
   const [progress, setProgress] = useState("");
-  const [inviteSelection, setInviteSelection] = useState<number[]>([]);
+  const [inviteSelection, setInviteSelection] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -72,9 +73,8 @@ export default function ChallengeDetailPage() {
   }
 
   async function sendInvites() {
-    const usernames = inviteable.filter((member) => inviteSelection.includes(member.id)).map((member) => member.username);
-    if (usernames.length === 0) return;
-    await run(() => inviteToChallenge(current.id, usernames));
+    if (inviteSelection.length === 0) return;
+    await run(() => inviteToChallenge(current.id, inviteSelection));
     setInviteSelection([]);
   }
 
@@ -149,13 +149,7 @@ export default function ChallengeDetailPage() {
       {inviteable.length === 0
         ? <p className="challenge-pending">Every member is already in this challenge.</p>
         : <div className="goal-card challenge-invite-panel">
-            <div className="challenge-invite-grid">{inviteable.map((member) => (
-              <label className={`challenge-invite-option${inviteSelection.includes(member.id) ? " challenge-invite-selected" : ""}`} key={member.id}>
-                <input type="checkbox" checked={inviteSelection.includes(member.id)} onChange={() => setInviteSelection((current) => current.includes(member.id) ? current.filter((item) => item !== member.id) : [...current, member.id])} />
-                <Avatar username={member.username} displayName={member.display_name} image={member.profile_image} />
-                <span>{member.display_name}</span>
-              </label>
-            ))}</div>
+            <MemberPicker members={members} selected={inviteSelection} exclude={challenge.participants.map((participant) => participant.username)} onChange={setInviteSelection} />
             <button className="button button-secondary" type="button" disabled={busy || inviteSelection.length === 0} onClick={() => void sendInvites()}><UserPlus size={15} /> Send invites</button>
           </div>}
     </section>}

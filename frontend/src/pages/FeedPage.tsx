@@ -3,6 +3,7 @@ import { ArrowUpRight, RotateCw } from "lucide-react";
 import { Link } from "wouter";
 import { getPosts } from "../api/posts";
 import PostCard from "../components/PostCard";
+import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import type { Post } from "../types/post";
 
 export default function FeedPage() {
@@ -10,9 +11,9 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function loadPosts() {
+  async function loadPosts(options?: { background?: boolean }) {
     setError("");
-    setLoading(true);
+    if (!options?.background) setLoading(true);
     try {
       setPosts(await getPosts());
     } catch (loadError) {
@@ -24,8 +25,19 @@ export default function FeedPage() {
 
   useEffect(() => { void loadPosts(); }, []);
 
+  const { pullDistance, refreshing, triggerDistance } = usePullToRefresh(() => loadPosts({ background: true }));
+
   return (
     <section className="page-column feed-page">
+      {(pullDistance > 0 || refreshing) && (
+        <div className="pull-refresh-indicator" style={{ height: refreshing ? 46 : pullDistance }}>
+          <RotateCw
+            size={17}
+            className={refreshing ? "pull-refresh-icon pull-refresh-spinning" : "pull-refresh-icon"}
+            style={refreshing ? undefined : { opacity: Math.min(pullDistance / triggerDistance, 1), transform: `rotate(${pullDistance * 3}deg)` }}
+          />
+        </div>
+      )}
       <header className="page-heading feed-heading">
         <div><p className="eyebrow">THE INNER CIRCLE</p><h1>FYP<span className="heading-period">.</span></h1></div>
         <button className="icon-button refresh-button" type="button" onClick={() => void loadPosts()} aria-label="Refresh feed" title="Refresh feed">

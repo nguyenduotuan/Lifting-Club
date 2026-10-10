@@ -23,7 +23,7 @@
 
 html { min-width: 320px; background: var(--bg); }
 
-body { min-width: 320px; min-height: 100vh; margin: 0; background: var(--bg); }
+body { min-width: 320px; min-height: 100vh; margin: 0; overscroll-behavior-y: contain; background: var(--bg); }
 
 button, input, textarea, select { font: inherit; }
 

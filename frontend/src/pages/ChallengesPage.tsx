@@ -4,7 +4,7 @@ import { CalendarClock, ChevronRight, Plus, Trophy, Users } from "lucide-react";
 import { createChallenge, getChallenges, respondToChallenge } from "../api/challenges";
 import { getUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
-import Avatar from "../components/Avatar";
+import MemberPicker from "../components/MemberPicker";
 import type { Challenge, ChallengeCreateInput } from "../types/challenge";
 import type { User } from "../types/user";
 
@@ -80,15 +80,6 @@ export default function ChallengesPage() {
   const active = useMemo(() => challenges.filter((challenge) => myMembership(challenge, user?.id)?.status !== "invited" && !isPast(challenge.deadline)), [challenges, user]);
   const past = useMemo(() => challenges.filter((challenge) => myMembership(challenge, user?.id)?.status !== "invited" && isPast(challenge.deadline)), [challenges, user]);
 
-  function toggleInvite(username: string) {
-    setForm((current) => ({
-      ...current,
-      invites: current.invites.includes(username)
-        ? current.invites.filter((name) => name !== username)
-        : [...current.invites, username],
-    }));
-  }
-
   async function respond(challenge: Challenge, action: "accept" | "decline") {
     setError("");
     try {
@@ -135,13 +126,7 @@ export default function ChallengesPage() {
       </div>
       {inviteable.length > 0 && <div className="challenge-invite-picker">
         <p className="goal-section-label">INVITE MEMBERS</p>
-        <div className="challenge-invite-grid">{inviteable.map((member) => (
-          <label className={`challenge-invite-option${form.invites.includes(member.username) ? " challenge-invite-selected" : ""}`} key={member.id}>
-            <input type="checkbox" checked={form.invites.includes(member.username)} onChange={() => toggleInvite(member.username)} />
-            <Avatar username={member.username} displayName={member.display_name} image={member.profile_image} />
-            <span>{member.display_name}</span>
-          </label>
-        ))}</div>
+        <MemberPicker members={inviteable} selected={form.invites} onChange={(invites) => setForm((current) => ({ ...current, invites }))} />
       </div>}
       {error && <p className="state-message state-error">{error}</p>}
       <button className="button button-primary" type="submit" disabled={saving}>{saving ? "Creating..." : "Create challenge"}</button>
