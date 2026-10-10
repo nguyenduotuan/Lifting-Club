@@ -1,28 +1,11 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Check, Info, Palette } from "lucide-react";
-
-const themes = [
-  { id: "steel", name: "Steel", description: "The original Circuit look", color: "#c5c8cf" },
-  { id: "field", name: "Field", description: "A quieter, natural accent", color: "#a9c6ad" },
-  { id: "signal", name: "Signal", description: "A warmer training-room accent", color: "#e6a18d" },
-] as const;
-
-type Theme = (typeof themes)[number]["id"];
-
-function isTheme(value: string | null): value is Theme {
-  return themes.some((theme) => theme.id === value);
-}
+import { applyTheme, getStoredTheme, themes, type ThemeId } from "../theme";
 
 export default function SettingsPage() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const savedTheme = window.localStorage.getItem("circuit-theme");
-    return isTheme(savedTheme) ? savedTheme : "steel";
-  });
+  const [theme, setTheme] = useState<ThemeId>(getStoredTheme);
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem("circuit-theme", theme);
-  }, [theme]);
+  useEffect(() => { applyTheme(theme); }, [theme]);
 
   return (
     <section className="page-column settings-page">
@@ -35,7 +18,7 @@ export default function SettingsPage() {
           <span className="settings-section-icon"><Palette size={18} /></span>
           <div><p className="eyebrow">APPEARANCE</p><h2 id="settings-themes-heading">Themes</h2></div>
         </header>
-        <p className="settings-section-description">Choose an accent for your Circuit experience.</p>
+        <p className="settings-section-description">Choose a look for your Circuit experience.</p>
         <div className="theme-options" role="group" aria-label="Choose a theme">
           {themes.map((option) => (
             <button
@@ -45,7 +28,7 @@ export default function SettingsPage() {
               aria-pressed={theme === option.id}
               onClick={() => setTheme(option.id)}
             >
-              <span className="theme-swatch" style={{ "--swatch-color": option.color } as CSSProperties}>
+              <span className="theme-swatch" style={{ "--swatch-color": option.swatch } as CSSProperties}>
                 {theme === option.id && <Check size={16} />}
               </span>
               <span className="theme-option-copy"><strong>{option.name}</strong><small>{option.description}</small></span>

@@ -4,11 +4,9 @@ import App from "./App";
 import "./styles/global.css";
 import "./styles/components.css";
 import "./styles/pages.css";
+import { initTheme } from "./theme";
 
-const savedTheme = window.localStorage.getItem("circuit-theme");
-if (savedTheme === "steel" || savedTheme === "field" || savedTheme === "signal") {
-  document.documentElement.dataset.theme = savedTheme;
-}
+initTheme();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

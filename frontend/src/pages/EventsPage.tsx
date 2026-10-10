@@ -127,7 +127,6 @@ export default function EventsPage() {
   return <section className="page-column events-page">
     <header className="page-heading goals-heading">
       <div><p className="eyebrow">MAKE A PLAN TOGETHER</p><h1>Events<span className="heading-period">.</span></h1><p className="goals-intro">Put a date on it and bring your people together.</p></div>
-      {activeCategory !== "hosted" && <button className="button button-primary" type="button" onClick={() => setShowForm((open) => !open)}><Plus size={16} /> New event</button>}
     </header>
 
     {showForm && <form ref={formRef} className="goal-create-panel" onSubmit={submitEvent}>
