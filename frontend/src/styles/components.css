@@ -28,7 +28,9 @@
 .media-carousel-stage { position: relative; overflow: hidden; touch-action: pan-y; }
 .media-frame { min-width: 0; overflow: hidden; aspect-ratio: 4 / 3; max-height: 560px; background: #111317; }
 .media-frame img, .media-frame video { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; background: #101216; }
-.media-image-button { display: block; width: 100%; height: 100%; padding: 0; border: 0; cursor: zoom-in; }
+.media-image-button { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
+.media-load-error { display: grid; height: 100%; place-content: center; justify-items: center; gap: 6px; color: #d7d8dc; background: #17191d; text-align: center; }
+.media-load-error small { color: #8e9098; font-size: 10px; }
 .media-nav, .media-viewer-nav, .media-viewer-close { display: grid; place-items: center; color: #f3f3f4; border: 1px solid rgba(255, 255, 255, .16); border-radius: 50%; background: rgba(12, 13, 16, .65); cursor: pointer; }
 .media-nav { position: absolute; top: 50%; width: 34px; height: 34px; transform: translateY(-50%); }
 .media-nav-previous { left: 12px; }
