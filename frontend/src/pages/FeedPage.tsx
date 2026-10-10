@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { ArrowUpRight, RotateCw } from "lucide-react";
-import { Link } from "wouter";
+import { Plus, RotateCw } from "lucide-react";
 import { getPosts } from "../api/posts";
 import PostCard from "../components/PostCard";
+import CreatePostPage from "./CreatePostPage";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import type { Post } from "../types/post";
 
@@ -10,6 +10,7 @@ export default function FeedPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [composerOpen, setComposerOpen] = useState(false);
 
   async function loadPosts(options?: { background?: boolean }) {
     setError("");
@@ -39,11 +40,14 @@ export default function FeedPage() {
         </div>
       )}
       <header className="page-heading feed-heading">
-        <div><p className="eyebrow">THE INNER CIRCLE</p><h1>FYP<span className="heading-period">.</span></h1></div>
-        <button className="icon-button refresh-button" type="button" onClick={() => void loadPosts()} aria-label="Refresh feed" title="Refresh feed">
-          <RotateCw size={17} />
-        </button>
+        <div><p className="eyebrow">THE INNER CIRCLE</p><h1>Posts<span className="heading-period">.</span></h1></div>
+        <div className="posts-heading-actions">
+          <button className="icon-button refresh-button" type="button" onClick={() => void loadPosts()} aria-label="Refresh posts" title="Refresh posts"><RotateCw size={17} /></button>
+          <button className="button button-primary" type="button" onClick={() => setComposerOpen((open) => !open)}><Plus size={16} /> New post</button>
+        </div>
       </header>
+
+      {composerOpen && <CreatePostPage embedded onCancel={() => setComposerOpen(false)} onPosted={() => { setComposerOpen(false); void loadPosts(); }} />}
 
       {loading ? <div className="state-message">Gathering the latest sessions<span className="loading-dots">...</span></div> : null}
       {!loading && error && <div className="state-message state-error" role="alert">{error}<button className="text-button" type="button" onClick={() => void loadPosts()}>Try again</button></div>}
@@ -52,7 +56,7 @@ export default function FeedPage() {
           <div className="empty-mark"><span /></div>
           <p className="eyebrow">A CLEAR START</p>
           <h2>The next session<br />starts here.</h2>
-          <Link className="button button-secondary" href="/create">Share a post <ArrowUpRight size={16} /></Link>
+          <button className="button button-secondary" type="button" onClick={() => setComposerOpen(true)}>Share a post <Plus size={16} /></button>
         </div>
       )}
       {!loading && !error && posts.length > 0 && <div className="post-list">{posts.map((post) => <PostCard post={post} key={post.id} />)}</div>}

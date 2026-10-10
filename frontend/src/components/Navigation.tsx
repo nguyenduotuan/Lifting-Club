@@ -1,39 +1,40 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Activity, Bell, CalendarDays, CircleUserRound, Dumbbell, Flag, Home, LogOut, Menu, Plus, Search, Trophy, X } from "lucide-react";
-import { getUsers } from "../api/users";
+import { Bell, CalendarDays, Dumbbell, Flag, Home, LogOut, Menu, Plus, Trophy, X } from "lucide-react";
+import { getChallenges } from "../api/challenges";
+import { getEvents } from "../api/events";
 import { useAuth } from "../hooks/useAuth";
-import type { User } from "../types/user";
 import Avatar from "./Avatar";
 
 export default function Navigation() {
   const { user, signOut } = useAuth();
   const [location, setLocation] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [members, setMembers] = useState<User[]>([]);
-  const [membersLoaded, setMembersLoaded] = useState(false);
-  const [membersRetry, setMembersRetry] = useState(0);
-  const [membersLoading, setMembersLoading] = useState(false);
-  const [membersError, setMembersError] = useState("");
-  const [memberQuery, setMemberQuery] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    if (membersLoaded) return;
+    if (!user) return;
     let active = true;
-    setMembersError("");
-    setMembersLoading(true);
-    getUsers()
-      .then((nextMembers) => {
-        if (!active) return;
-        setMembers(nextMembers.some((member) => member.id === user?.id) || !user ? nextMembers : [...nextMembers, user]);
-        setMembersLoaded(true);
-      })
-      .catch((loadError) => {
-        if (active) setMembersError(loadError instanceof Error ? loadError.message : "Members could not be loaded.");
-      })
-      .finally(() => active && setMembersLoading(false));
-    return () => { active = false; };
-  }, [membersLoaded, membersRetry]);
+    const refreshNotifications = async () => {
+      const [challengeResult, eventResult] = await Promise.allSettled([getChallenges(), getEvents()]);
+      if (!active) return;
+      const challengeInvites = challengeResult.status === "fulfilled"
+        ? challengeResult.value.reduce((count, challenge) => count + challenge.participants.filter((person) => person.user_id === user.id && person.status === "invited").length, 0)
+        : 0;
+      const eventInvites = eventResult.status === "fulfilled"
+        ? eventResult.value.reduce((count, event) => count + event.participants.filter((person) => person.user_id === user.id && person.status === "invited").length, 0)
+        : 0;
+      setUnreadCount(challengeInvites + eventInvites);
+    };
+    void refreshNotifications();
+    const interval = window.setInterval(() => void refreshNotifications(), 60_000);
+    window.addEventListener("focus", refreshNotifications);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refreshNotifications);
+    };
+  }, [location, user?.id]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -52,10 +53,8 @@ export default function Navigation() {
 
   if (!user) return null;
 
-  const normalizedQuery = memberQuery.trim().toLocaleLowerCase();
-  const matchingMembers = members.filter((member) =>
-    `${member.display_name} ${member.username}`.toLocaleLowerCase().includes(normalizedQuery),
-  );
+  const notificationLabel = unreadCount > 0 ? `Notifications, ${unreadCount} new` : "Notifications";
+  const notificationBadge = unreadCount > 0 && <span className="notification-badge">{unreadCount > 99 ? "99+" : unreadCount}</span>;
 
   return (
     <>
@@ -64,9 +63,12 @@ export default function Navigation() {
           <span className="brand-symbol"><Dumbbell size={19} strokeWidth={1.7} /></span>
           <span className="brand-copy"><strong>CIRCUIT</strong><small>SHARED MILESTONES</small></span>
         </Link>
-        <button className="icon-button mobile-menu-toggle" type="button" onClick={() => setMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={menuOpen} aria-controls="mobile-navigation" title="Open menu">
-          <Menu size={21} />
-        </button>
+        <div className="mobile-topbar-actions">
+          <Link href="/notifications" className={`mobile-notification-link${location === "/notifications" ? " mobile-notification-link-active" : ""}`} aria-label={notificationLabel} title={notificationLabel}>
+            <Bell size={19} strokeWidth={1.8} />{notificationBadge}
+          </Link>
+          <button className="icon-button mobile-menu-toggle" type="button" onClick={() => setMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={menuOpen} aria-controls="mobile-navigation" title="Open menu"><Menu size={21} /></button>
+        </div>
       </header>
       {menuOpen && <button className="mobile-menu-backdrop" type="button" onClick={() => setMenuOpen(false)} aria-label="Close navigation menu" />}
       <aside className={`side-nav${menuOpen ? " side-nav-open" : ""}`} id="mobile-navigation">
@@ -82,11 +84,8 @@ export default function Navigation() {
           <Link href="/" className={`nav-item${location === "/" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
             <Home size={19} strokeWidth={1.8} /><span>Home</span>
           </Link>
-          <Link href="/feed" className={`nav-item${location === "/feed" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
-            <Activity size={19} strokeWidth={1.8} /><span>FYP</span>
-          </Link>
-          <Link href="/create" className={`nav-item${location === "/create" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
-            <Plus size={19} strokeWidth={1.8} /><span>Post</span>
+          <Link href="/notifications" className={`nav-item${location === "/notifications" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)} aria-label={notificationLabel}>
+            <Bell size={19} strokeWidth={1.8} /><span>Notifications</span>{notificationBadge}
           </Link>
           <Link href="/goals" className={`nav-item${location === "/goals" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
             <Flag size={19} strokeWidth={1.8} /><span>Goals</span>
@@ -97,28 +96,10 @@ export default function Navigation() {
           <Link href="/events" className={`nav-item${location === "/events" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
             <CalendarDays size={19} strokeWidth={1.8} /><span>Events</span>
           </Link>
-          <Link href="/notifications" className={`nav-item${location === "/notifications" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
-            <Bell size={19} strokeWidth={1.8} /><span>Notifications</span>
+          <Link href="/posts" className={`nav-item nav-item-posts${location === "/posts" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
+            <Plus size={19} strokeWidth={1.8} /><span>Posts</span>
           </Link>
         </nav>
-
-        <section className="member-search-section" aria-label="Find members">
-          <label className="member-search-field">
-            <Search size={15} aria-hidden="true" />
-            <input type="search" value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder="Search members" aria-label="Search members" />
-          </label>
-          <div className="member-search-results" aria-live="polite">
-            {membersLoading && <p className="member-search-state">Loading members...</p>}
-            {!membersLoading && membersError && <p className="member-search-state member-search-error">{membersError} <button className="text-button" type="button" onClick={() => setMembersRetry((attempt) => attempt + 1)}>Try again</button></p>}
-            {!membersLoading && !membersError && matchingMembers.map((member) => (
-              <Link href={`/profile/${member.username}`} className="member-search-result" key={member.id} onClick={() => setMenuOpen(false)}>
-                <Avatar username={member.username} displayName={member.display_name} image={member.profile_image} />
-                <span className="member-search-copy"><strong>{member.display_name}</strong><small>@{member.username}</small></span>
-              </Link>
-            ))}
-            {!membersLoading && !membersError && matchingMembers.length === 0 && <p className="member-search-state">{members.length > 0 ? "No matching members." : "No members are available."}</p>}
-          </div>
-        </section>
 
         <div className="nav-account">
           <Link href={`/profile/${user.username}`} className="nav-account-profile" onClick={() => setMenuOpen(false)} aria-label={`View ${user.display_name}'s profile`}>
@@ -130,26 +111,6 @@ export default function Navigation() {
           </button>
         </div>
       </aside>
-      <nav className="mobile-bottom-nav" aria-label="Quick navigation">
-        <Link href="/" className={`mobile-bottom-nav-item${location === "/" ? " mobile-bottom-nav-item-active" : ""}`}>
-          <Home size={19} strokeWidth={1.8} /><span>Home</span>
-        </Link>
-        <Link href="/feed" className={`mobile-bottom-nav-item${location === "/feed" ? " mobile-bottom-nav-item-active" : ""}`}>
-          <Activity size={19} strokeWidth={1.8} /><span>FYP</span>
-        </Link>
-        <Link href="/create" className={`mobile-bottom-nav-item${location === "/create" ? " mobile-bottom-nav-item-active" : ""}`}>
-          <Plus size={21} strokeWidth={1.8} /><span>Post</span>
-        </Link>
-        <Link href="/events" className={`mobile-bottom-nav-item${location === "/events" ? " mobile-bottom-nav-item-active" : ""}`}>
-          <CalendarDays size={18} strokeWidth={1.8} /><span>Events</span>
-        </Link>
-        <Link href="/challenges" className={`mobile-bottom-nav-item${location.startsWith("/challenges") ? " mobile-bottom-nav-item-active" : ""}`}>
-          <Trophy size={18} strokeWidth={1.8} /><span>Challenges</span>
-        </Link>
-        <Link href={`/profile/${user.username}`} className={`mobile-bottom-nav-item${location.startsWith("/profile") ? " mobile-bottom-nav-item-active" : ""}`}>
-          <CircleUserRound size={19} strokeWidth={1.8} /><span>Profile</span>
-        </Link>
-      </nav>
     </>
   );
 }

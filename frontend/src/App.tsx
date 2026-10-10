@@ -4,7 +4,6 @@ import Navigation from "./components/Navigation";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import ChallengeDetailPage from "./pages/ChallengeDetailPage";
 import ChallengesPage from "./pages/ChallengesPage";
-import CreatePostPage from "./pages/CreatePostPage";
 import EventsPage from "./pages/EventsPage";
 import FeedPage from "./pages/FeedPage";
 import GoalsPage from "./pages/GoalsPage";
@@ -40,14 +39,19 @@ function ProfileRedirect() {
   return <LocationRedirect to={`/profile/${user?.username ?? ""}`} />;
 }
 
+function PostsRedirect() {
+  return <LocationRedirect to="/posts" />;
+}
+
 function AppRoutes() {
   return (
     <Switch>
       <Route path="/login"><LoginRoute /></Route>
-      <Route path="/feed"><RequireAuth><FeedPage /></RequireAuth></Route>
+      <Route path="/feed"><RequireAuth><PostsRedirect /></RequireAuth></Route>
+      <Route path="/create"><RequireAuth><PostsRedirect /></RequireAuth></Route>
+      <Route path="/posts"><RequireAuth><FeedPage /></RequireAuth></Route>
       <Route path="/events"><RequireAuth><EventsPage /></RequireAuth></Route>
       <Route path="/notifications"><RequireAuth><NotificationsPage /></RequireAuth></Route>
-      <Route path="/create"><RequireAuth><CreatePostPage /></RequireAuth></Route>
       <Route path="/goals"><RequireAuth><GoalsPage /></RequireAuth></Route>
       <Route path="/challenges"><RequireAuth><ChallengesPage /></RequireAuth></Route>
       <Route path="/challenges/:id"><RequireAuth><ChallengeDetailPage /></RequireAuth></Route>

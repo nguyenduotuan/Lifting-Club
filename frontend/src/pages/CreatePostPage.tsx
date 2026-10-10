@@ -13,7 +13,7 @@ function newLift(): LiftInput {
 
 type PostMode = "regular" | "strength" | "activity";
 
-export default function CreatePostPage() {
+export default function CreatePostPage({ embedded = false, onPosted, onCancel }: { embedded?: boolean; onPosted?: () => void; onCancel?: () => void }) {
   const [, setLocation] = useLocation();
   const [postMode, setPostMode] = useState<PostMode>("strength");
   const [caption, setCaption] = useState("");
@@ -92,7 +92,8 @@ export default function CreatePostPage() {
     setSubmitting(true);
     try {
       await createPost(formData);
-      setLocation("/feed");
+      if (embedded) onPosted?.();
+      else setLocation("/posts");
     } catch (createError) {
       setError(createError instanceof Error ? createError.message : "Post could not be created.");
     } finally {
@@ -101,9 +102,9 @@ export default function CreatePostPage() {
   }
 
   return (
-    <section className="page-column create-page">
-      <Link className="back-link" href="/feed"><ArrowLeft size={16} /> Back to FYP</Link>
-      <header className="page-heading create-heading"><div><p className="eyebrow">LOG THE SESSION</p><h1>Post<span className="heading-period">.</span></h1></div></header>
+    <section className={`page-column create-page${embedded ? " create-page-embedded" : ""}`}>
+      {!embedded && <Link className="back-link" href="/posts"><ArrowLeft size={16} /> Back to posts</Link>}
+      <header className="page-heading create-heading"><div><p className="eyebrow">LOG THE SESSION</p><h1>{embedded ? "New post" : "Post"}<span className="heading-period">.</span></h1></div>{embedded && onCancel && <button className="icon-button" type="button" onClick={onCancel} aria-label="Close post composer">×</button>}</header>
 
       <form className="create-form" onSubmit={handleSubmit}>
         <label className="field-label" htmlFor="caption">Caption <span>OPTIONAL</span></label>
