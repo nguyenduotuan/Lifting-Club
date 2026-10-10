@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
-import { CalendarClock, ChevronRight, Globe2, Plus, Trophy, Users } from "lucide-react";
-import { createChallenge, getChallenges, getPublicChallenges, joinChallenge, leaveChallenge, respondToChallenge } from "../api/challenges";
+import { CalendarClock, ChevronRight, Globe2, Pin, Plus, Trophy, Users } from "lucide-react";
+import { createChallenge, getChallenges, getPublicChallenges } from "../api/challenges";
 import { getUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 import MemberPicker from "../components/MemberPicker";
 import type { Challenge, ChallengeCreateInput } from "../types/challenge";
 import type { User } from "../types/user";
+import { getPinnedIds, pinnedFirst } from "../utils/pins";
 
 const emptyForm: ChallengeCreateInput = {
   title: "",
@@ -47,6 +48,7 @@ export function ChallengeCard({ challenge, userId, action }: { challenge: Challe
     <div className="goal-card-top">
       <div className="challenge-card-labels">
         <span className="goal-category">{challenge.host_id === userId ? "HOSTING" : membership?.status === "invited" ? "INVITED" : "JOINED"}</span>
+        {getPinnedIds(userId, "challenge").includes(challenge.id) && <span className="pinned-marker" title="Pinned to homepage"><Pin size={12} /></span>}
         <span className={`visibility-tag${challenge.is_public ? " visibility-tag-public" : ""}`}>{challenge.is_public ? "PUBLIC" : "PRIVATE"}</span>
       </div>
       <span className="challenge-deadline"><CalendarClock size={13} /> {formatDeadline(challenge.deadline)}</span>
@@ -75,7 +77,7 @@ export default function ChallengesPage() {
   const [members, setMembers] = useState<User[]>([]);
   const [form, setForm] = useState<ChallengeCreateInput>(emptyForm);
   const [showForm, setShowForm] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<ChallengeCategory>("private");
+  const [activeCategory, setActiveCategory] = useState<ChallengeCategory>(() => new URLSearchParams(window.location.search).get("category") === "public" ? "public" : "private");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -95,39 +97,6 @@ export default function ChallengesPage() {
     .filter((challenge) => challenge.is_public && challenge.host_id !== user?.id && !isPast(challenge.deadline))
     .map((challenge) => [challenge.id, challenge])).values()), [challenges, publicChallenges, user]);
   const past = useMemo(() => challenges.filter((challenge) => (challenge.host_id === user?.id || myMembership(challenge, user?.id)?.status === "accepted") && isPast(challenge.deadline)), [challenges, user]);
-
-  async function respond(challenge: Challenge, action: "accept" | "decline") {
-    setError("");
-    try {
-      const updated = await respondToChallenge(challenge.id, action);
-      setChallenges((current) => current.map((item) => item.id === updated.id ? updated : item));
-      setPublicChallenges((current) => current.map((item) => item.id === updated.id ? updated : item));
-    } catch (respondError) {
-      setError(respondError instanceof Error ? respondError.message : "The invite could not be answered.");
-    }
-  }
-
-  async function join(challenge: Challenge) {
-    setError("");
-    try {
-      const updated = await joinChallenge(challenge.id);
-      setPublicChallenges((current) => current.map((item) => item.id === updated.id ? updated : item));
-      setChallenges((current) => [updated, ...current.filter((item) => item.id !== updated.id)]);
-    } catch (joinError) {
-      setError(joinError instanceof Error ? joinError.message : "Could not join this challenge.");
-    }
-  }
-
-  async function leave(challenge: Challenge) {
-    setError("");
-    try {
-      const updated = await leaveChallenge(challenge.id);
-      setChallenges((current) => current.map((item) => item.id === updated.id ? updated : item));
-      setPublicChallenges((current) => current.map((item) => item.id === updated.id ? updated : item));
-    } catch (leaveError) {
-      setError(leaveError instanceof Error ? leaveError.message : "Could not leave this challenge.");
-    }
-  }
 
   async function submitChallenge(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -199,28 +168,17 @@ export default function ChallengesPage() {
       {activeCategory === "private" && <>
         <div className="goal-category-heading"><span>Private challenges &amp; invitations</span><i /></div>
         {privateChallenges.length === 0 && <p className="collection-empty">No private challenges yet. Accept an invite or create one for your members.</p>}
-        <div className="goal-grid">{privateChallenges.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} action={myMembership(challenge, user?.id)?.status === "invited" ? <>
-          <button className="button button-secondary" type="button" onClick={() => void respond(challenge, "accept")}>Accept</button>
-          <button className="text-button" type="button" onClick={() => void respond(challenge, "decline")}>Decline</button>
-        </> : <button className="text-button" type="button" onClick={() => void leave(challenge)}>Leave challenge</button>} />)}</div>
+        <div className="goal-grid">{pinnedFirst(privateChallenges, getPinnedIds(user?.id, "challenge"), (challenge) => challenge.id).map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>
       </>}
       {activeCategory === "public" && <>
         <div className="goal-category-heading"><span>Open to everyone</span><i /></div>
         {publicVisible.length === 0 && <p className="collection-empty">No public challenges to show right now.</p>}
-        <div className="goal-grid">{publicVisible.map((challenge) => {
-          const status = myMembership(challenge, user?.id)?.status;
-          return <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} action={status === "invited" ? <>
-            <button className="button button-secondary" type="button" onClick={() => void respond(challenge, "accept")}>Accept</button>
-            <button className="text-button" type="button" onClick={() => void respond(challenge, "decline")}>Decline</button>
-          </> : status === "accepted" ? <button className="text-button" type="button" onClick={() => void leave(challenge)}>Leave challenge</button> : <button className="button button-secondary" type="button" onClick={() => void join(challenge)}>Join challenge</button>} />;
-        })}</div>
+        <div className="goal-grid">{pinnedFirst(publicVisible, getPinnedIds(user?.id, "challenge"), (challenge) => challenge.id).map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>
       </>}
       {activeCategory === "hosted" && <>
         <div className="goal-category-heading"><span>Created by you</span><i /></div>
         {hosted.length === 0 && <p className="collection-empty">Challenges you create will appear here.</p>}
-        <div className="goal-grid">{hosted.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} action={myMembership(challenge, user?.id)?.status === "accepted"
-          ? <button className="text-button" type="button" onClick={() => void leave(challenge)}>Leave challenge</button>
-          : <button className="button button-secondary" type="button" onClick={() => void join(challenge)}>Rejoin challenge</button>} />)}</div>
+        <div className="goal-grid">{pinnedFirst(hosted, getPinnedIds(user?.id, "challenge"), (challenge) => challenge.id).map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>
       </>}
     </section>}
 

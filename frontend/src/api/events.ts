@@ -5,6 +5,10 @@ export function getEvents(): Promise<ClubEvent[]> {
   return request<ClubEvent[]>("/events");
 }
 
+export function getEvent(eventId: number): Promise<ClubEvent> {
+  return request<ClubEvent>(`/events/${eventId}`);
+}
+
 export function getPublicEvents(): Promise<ClubEvent[]> {
   return request<ClubEvent[]>("/events/discover");
 }

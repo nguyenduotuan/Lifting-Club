@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { CalendarClock, Globe2, MapPin, Plus, Trash2, Users } from "lucide-react";
-import { createEvent, deleteEvent, getEvents, getPublicEvents, joinEvent, leaveEvent, respondToEvent } from "../api/events";
+import { Link } from "wouter";
+import { CalendarClock, Globe2, MapPin, Pin, Plus, Users } from "lucide-react";
+import { createEvent, getEvents, getPublicEvents } from "../api/events";
 import { getUsers } from "../api/users";
 import MemberPicker from "../components/MemberPicker";
 import { useAuth } from "../hooks/useAuth";
 import type { ClubEvent, EventCreateInput } from "../types/event";
 import type { User } from "../types/user";
+import { getPinnedIds, pinnedFirst } from "../utils/pins";
 
 const emptyForm: EventCreateInput = {
   title: "",
@@ -34,7 +36,7 @@ function formatDate(date: string): string {
 
 type EventCategory = "private" | "public" | "hosted";
 
-function EventCard({ event, userId, action }: { event: ClubEvent; userId: number | undefined; action?: React.ReactNode }) {
+function EventCard({ event, userId }: { event: ClubEvent; userId: number | undefined }) {
   const accepted = event.participants.filter((participant) => participant.status === "accepted").length;
   const state = membership(event, userId)?.status;
   const category = event.host_id === userId ? "HOSTING" : state === "invited" ? "INVITED" : state === "accepted" ? "GOING" : event.is_public ? "PUBLIC" : "PRIVATE";
@@ -43,17 +45,17 @@ function EventCard({ event, userId, action }: { event: ClubEvent; userId: number
     <div className="goal-card-top">
       <div className="challenge-card-labels">
         <span className="goal-category">{category}</span>
+        {getPinnedIds(userId, "event").includes(event.id) && <span className="pinned-marker" title="Pinned to homepage"><Pin size={12} /></span>}
         <span className={`visibility-tag${event.is_public ? " visibility-tag-public" : ""}`}>{event.is_public ? "PUBLIC" : "PRIVATE"}</span>
       </div>
       <span className="event-date"><CalendarClock size={13} /> {formatDate(event.starts_at)}</span>
     </div>
-    <div className="event-card-title"><h2>{event.title}</h2><p>{event.description || `Hosted by ${event.host_display_name}.`}</p></div>
+    <Link href={`/events/${event.id}`} className="event-card-title"><h2>{event.title}</h2><p>{event.description || `Hosted by ${event.host_display_name}.`}</p></Link>
     <div className="goal-meta">
       {event.location && <span><MapPin size={13} /> {event.location}</span>}
       <span><Users size={13} /> {accepted}{event.max_participants !== null ? ` / ${event.max_participants}` : ""} attending</span>
       <span>Host: {event.host_display_name}</span>
     </div>
-    {action && <div className="challenge-card-action">{action}</div>}
   </article>;
 }
 
@@ -64,10 +66,9 @@ export default function EventsPage() {
   const [members, setMembers] = useState<User[]>([]);
   const [form, setForm] = useState<EventCreateInput>(emptyForm);
   const [showForm, setShowForm] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<EventCategory>("private");
+  const [activeCategory, setActiveCategory] = useState<EventCategory>(() => new URLSearchParams(window.location.search).get("category") === "public" ? "public" : "private");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [busyEventId, setBusyEventId] = useState<number | null>(null);
   const [error, setError] = useState("");
 
   async function loadEvents() {
@@ -96,24 +97,6 @@ export default function EventsPage() {
   const past = useMemo(() => events.filter((event) => (event.host_id === user?.id || membership(event, user?.id)?.status === "accepted") && eventHasEnded(event)), [events, user]);
   const inviteable = members.filter((member) => member.id !== user?.id);
 
-  async function runEventAction(event: ClubEvent, action: () => Promise<ClubEvent>) {
-    setError("");
-    setBusyEventId(event.id);
-    try {
-      const updated = await action();
-      setEvents((current) => [updated, ...current.filter((item) => item.id !== updated.id)]);
-      setPublicEvents((current) => current.map((item) => item.id === updated.id ? updated : item));
-    } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : "The event could not be updated.");
-    } finally {
-      setBusyEventId(null);
-    }
-  }
-
-  async function updateAttendance(event: ClubEvent, action: "join" | "leave") {
-    await runEventAction(event, () => action === "join" ? joinEvent(event.id) : leaveEvent(event.id));
-  }
-
   async function submitEvent(submitEvent: React.FormEvent<HTMLFormElement>) {
     submitEvent.preventDefault();
     setError("");
@@ -133,20 +116,6 @@ export default function EventsPage() {
       setError(saveError instanceof Error ? saveError.message : "The event could not be created.");
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function removeEvent(event: ClubEvent) {
-    if (!window.confirm(`Delete “${event.title}”? This cannot be undone.`)) return;
-    setBusyEventId(event.id);
-    try {
-      await deleteEvent(event.id);
-      setEvents((current) => current.filter((item) => item.id !== event.id));
-      setPublicEvents((current) => current.filter((item) => item.id !== event.id));
-    } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : "The event could not be deleted.");
-    } finally {
-      setBusyEventId(null);
     }
   }
 
@@ -195,32 +164,17 @@ export default function EventsPage() {
       {activeCategory === "private" && <>
         <div className="goal-category-heading"><span>Private events &amp; invitations</span><i /></div>
         {privateVisible.length === 0 && <p className="collection-empty">Private invitations and events you join will appear here.</p>}
-        <div className="goal-grid">{privateVisible.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={membership(event, user?.id)?.status === "invited" ? <>
-          <button className="button button-secondary" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => respondToEvent(event.id, "accept"))}>Accept</button>
-          <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => respondToEvent(event.id, "decline"))}>Decline</button>
-        </> : <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "leave")}>Leave event</button>} />)}</div>
+        <div className="goal-grid">{pinnedFirst(privateVisible, getPinnedIds(user?.id, "event"), (event) => event.id).map((event) => <EventCard key={event.id} event={event} userId={user?.id} />)}</div>
       </>}
       {activeCategory === "public" && <>
         <div className="goal-category-heading"><span>Open to everyone</span><i /></div>
         {publicVisible.length === 0 && <p className="collection-empty">No public events to show right now.</p>}
-        <div className="goal-grid">{publicVisible.map((event) => {
-          const state = membership(event, user?.id)?.status;
-          const action = state === "invited" ? <>
-            <button className="button button-secondary" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => respondToEvent(event.id, "accept"))}>Accept</button>
-            <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => respondToEvent(event.id, "decline"))}>Decline</button>
-          </> : state === "accepted" ? <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "leave")}>Leave event</button> : <button className="button button-secondary" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => joinEvent(event.id))}>Join event</button>;
-          return <EventCard key={event.id} event={event} userId={user?.id} action={action} />;
-        })}</div>
+        <div className="goal-grid">{pinnedFirst(publicVisible, getPinnedIds(user?.id, "event"), (event) => event.id).map((event) => <EventCard key={event.id} event={event} userId={user?.id} />)}</div>
       </>}
       {activeCategory === "hosted" && <>
         <div className="goal-category-heading"><span>Created by you</span><i /></div>
         {hosted.length === 0 && <p className="collection-empty">Events you create will appear here.</p>}
-        <div className="goal-grid">{hosted.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={<>
-          {membership(event, user?.id)?.status === "accepted"
-            ? <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "leave")}>Leave event</button>
-            : <button className="button button-secondary" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "join")}>Rejoin event</button>}
-          <button className="icon-button event-delete" type="button" disabled={busyEventId === event.id} onClick={() => void removeEvent(event)} aria-label={`Delete ${event.title}`} title="Delete event"><Trash2 size={15} /></button>
-        </>} />)}</div>
+        <div className="goal-grid">{pinnedFirst(hosted, getPinnedIds(user?.id, "event"), (event) => event.id).map((event) => <EventCard key={event.id} event={event} userId={user?.id} />)}</div>
       </>}
     </section>}
     {!loading && past.length > 0 && <section className="goal-category-section">

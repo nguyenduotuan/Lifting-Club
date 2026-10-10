@@ -5,12 +5,14 @@ import { AuthProvider, useAuth } from "./hooks/useAuth";
 import ChallengeDetailPage from "./pages/ChallengeDetailPage";
 import ChallengesPage from "./pages/ChallengesPage";
 import EventsPage from "./pages/EventsPage";
+import EventDetailPage from "./pages/EventDetailPage";
 import FeedPage from "./pages/FeedPage";
 import GoalsPage from "./pages/GoalsPage";
 import LoginPage from "./pages/LoginPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import PortalPage from "./pages/PortalPage";
 import ProfilePage from "./pages/ProfilePage";
+import SchedulePage from "./pages/SchedulePage";
 
 function LocationRedirect({ to }: { to: string }) {
   const [, setLocation] = useLocation();
@@ -51,6 +53,8 @@ function AppRoutes() {
       <Route path="/create"><RequireAuth><PostsRedirect /></RequireAuth></Route>
       <Route path="/posts"><RequireAuth><FeedPage /></RequireAuth></Route>
       <Route path="/events"><RequireAuth><EventsPage /></RequireAuth></Route>
+      <Route path="/events/:id"><RequireAuth><EventDetailPage /></RequireAuth></Route>
+      <Route path="/calendar"><RequireAuth><SchedulePage /></RequireAuth></Route>
       <Route path="/notifications"><RequireAuth><NotificationsPage /></RequireAuth></Route>
       <Route path="/goals"><RequireAuth><GoalsPage /></RequireAuth></Route>
       <Route path="/challenges"><RequireAuth><ChallengesPage /></RequireAuth></Route>

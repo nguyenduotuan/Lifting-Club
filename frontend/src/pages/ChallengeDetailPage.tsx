@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "wouter";
-import { ArrowLeft, CalendarClock, Crown, Trash2, Trophy, UserPlus } from "lucide-react";
-import { deleteChallenge, getChallenge, inviteToChallenge, joinChallenge, respondToChallenge, updateChallengeProgress } from "../api/challenges";
+import { ArrowLeft, CalendarClock, Crown, Trophy, UserPlus } from "lucide-react";
+import { deleteChallenge, getChallenge, inviteToChallenge, joinChallenge, leaveChallenge, respondToChallenge, updateChallengeProgress } from "../api/challenges";
 import { getUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 import Avatar from "../components/Avatar";
+import ActivityOptions from "../components/ActivityOptions";
 import MemberPicker from "../components/MemberPicker";
 import type { Challenge } from "../types/challenge";
 import type { User } from "../types/user";
+import { getPinnedIds, togglePinnedId } from "../utils/pins";
 
 function formatDeadline(deadline: string | null): string {
   if (!deadline) return "No deadline";
@@ -26,6 +28,7 @@ export default function ChallengeDetailPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [pinnedIds, setPinnedIds] = useState<number[]>(() => getPinnedIds(user?.id, "challenge"));
 
   useEffect(() => {
     if (!Number.isFinite(challengeId)) { setError("Challenge not found."); setLoading(false); return; }
@@ -88,6 +91,10 @@ export default function ChallengeDetailPage() {
     }
   }
 
+  function togglePin() {
+    if (user) setPinnedIds(togglePinnedId(user.id, "challenge", current.id));
+  }
+
   return <section className="page-column challenge-detail-page">
     <Link href="/challenges" className="challenge-back"><ArrowLeft size={15} /> All challenges</Link>
 
@@ -97,8 +104,14 @@ export default function ChallengeDetailPage() {
         <h1>{challenge.title}<span className="heading-period">.</span></h1>
         <p className="goals-intro">{challenge.description || "A shared effort, tracked together."}</p>
       </div>
-      {isHost && <button className="icon-button challenge-delete" type="button" onClick={() => void removeChallenge()} aria-label="Delete challenge" title="Delete challenge"><Trash2 size={17} /></button>}
-      {!membership && challenge.is_public && <button className="button button-primary" type="button" disabled={busy} onClick={() => void run(() => joinChallenge(challenge.id))}>Join challenge</button>}
+      <ActivityOptions title={current.title} pinned={pinnedIds.includes(current.id)} onTogglePin={togglePin}>
+        {membership?.status === "invited" ? <>
+          <button type="button" role="menuitem" disabled={busy} onClick={() => void run(() => respondToChallenge(current.id, "accept"))}>Accept invitation</button>
+          <button type="button" role="menuitem" disabled={busy} onClick={() => void run(() => respondToChallenge(current.id, "decline"))}>Decline invitation</button>
+        </> : membership?.status === "accepted" ? <button type="button" role="menuitem" disabled={busy} onClick={() => void run(() => leaveChallenge(current.id))}>Leave challenge</button>
+          : challenge.is_public && <button type="button" role="menuitem" disabled={busy} onClick={() => void run(() => joinChallenge(current.id))}>Join challenge</button>}
+        {isHost && <button className="activity-options-danger" type="button" role="menuitem" disabled={busy} onClick={() => void removeChallenge()}>Delete challenge</button>}
+      </ActivityOptions>
     </header>
 
     <div className="goals-overview challenge-facts">
