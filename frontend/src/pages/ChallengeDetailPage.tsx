@@ -130,15 +130,18 @@ export default function ChallengeDetailPage() {
       <div className="goal-category-heading"><span>Leaderboard</span><i /></div>
       {leaderboard.length === 0 && <div className="state-message">Nobody has joined yet.</div>}
       <div className="challenge-leaderboard">{leaderboard.map((participant, index) => {
-        const percentage = target ? Math.min(100, Math.round((participant.current_value / target) * 100)) : null;
+        const progressPercent = target
+          ? Math.min(100, Math.max(0, (participant.current_value / target) * 100))
+          : null;
+        const percentage = progressPercent === null ? null : Math.round(progressPercent);
         return <div className={`goal-card challenge-standing${participant.user_id === user?.id ? " challenge-standing-you" : ""}`} key={participant.id}>
           <span className="challenge-rank">{index === 0 ? <Crown size={15} /> : `#${index + 1}`}</span>
           <Avatar username={participant.username} displayName={participant.display_name} image={participant.profile_image} />
           <div className="challenge-standing-copy">
             <strong>{participant.display_name}{participant.user_id === challenge.host_id && <small> · host</small>}</strong>
-            {percentage !== null && <div className="goal-progress-track"><span style={{ width: `${percentage}%` }} /></div>}
+            {progressPercent !== null && <div className="goal-progress-track"><span style={{ width: `${progressPercent}%` }} /></div>}
           </div>
-          <span className="challenge-standing-value">{participant.current_value}{target !== null ? ` / ${target}` : ""} {challenge.unit ?? ""}</span>
+          <span className="challenge-standing-value">{participant.current_value}{target !== null ? ` / ${target} · ${percentage}%` : ""} {challenge.unit ?? ""}</span>
         </div>;
       })}</div>
     </section>

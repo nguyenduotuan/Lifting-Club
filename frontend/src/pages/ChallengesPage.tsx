@@ -34,7 +34,10 @@ export function ChallengeCard({ challenge, userId, action }: { challenge: Challe
   const membership = myMembership(challenge, userId);
   const accepted = challenge.participants.filter((participant) => participant.status === "accepted");
   const top = challenge.target_value ? [...accepted].sort((a, b) => b.current_value - a.current_value)[0] : null;
-  const percentage = challenge.target_value && membership ? Math.min(100, Math.round((membership.current_value / challenge.target_value) * 100)) : null;
+  const progressPercent = challenge.target_value && membership
+    ? Math.min(100, Math.max(0, (membership.current_value / challenge.target_value) * 100))
+    : null;
+  const percentage = progressPercent === null ? null : Math.round(progressPercent);
 
   return <article className={`goal-card challenge-card${isPast(challenge.deadline) ? " challenge-card-past" : ""}`}>
     <div className="goal-card-top">
@@ -50,9 +53,9 @@ export function ChallengeCard({ challenge, userId, action }: { challenge: Challe
       {challenge.target_value !== null && <span>Goal: {challenge.target_value} {challenge.unit ?? ""}</span>}
       {top && top.current_value > 0 && <span>Leader: {top.display_name}</span>}
     </div>
-    {percentage !== null && membership?.status === "accepted" && <div className="goal-progress-block">
-      <div className="goal-progress-label"><span>Your progress</span><strong>{percentage}%</strong></div>
-      <div className="goal-progress-track"><span style={{ width: `${percentage}%` }} /></div>
+    {progressPercent !== null && membership?.status === "accepted" && <div className="goal-progress-block">
+      <div className="goal-progress-label"><span>{membership.current_value} / {challenge.target_value} {challenge.unit ?? ""}</span><strong>{percentage}%</strong></div>
+      <div className="goal-progress-track"><span style={{ width: `${progressPercent}%` }} /></div>
     </div>}
     {action && <div className="challenge-card-action">{action}</div>}
   </article>;
