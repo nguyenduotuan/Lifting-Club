@@ -111,9 +111,9 @@ export default function CreatePostPage() {
 
         <label className="field-label" htmlFor="post-type">What are you logging?</label>
         <select id="post-type" value={postMode} onChange={(event) => { setPostMode(event.target.value as PostMode); setError(""); }}>
-          <option value="strength">Strength session</option>
-          <option value="activity">Distance activity</option>
-          <option value="regular">Just a post</option>
+          <option value="regular">Regular Post</option>
+          <option value="strength">Strength Session</option>
+          <option value="activity">Distance Activity</option>
         </select>
 
         {postMode === "strength" && <><div className="form-section-heading"><div><p className="eyebrow">THE WORK</p><h2>Lifts</h2></div><button className="button button-small button-secondary" type="button" onClick={() => setLifts((current) => [...current, newLift()])}><Plus size={15} /> Add lift</button></div>
