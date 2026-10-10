@@ -84,9 +84,6 @@ export default function Navigation() {
           <Link href="/" className={`nav-item${location === "/" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
             <Home size={19} strokeWidth={1.8} /><span>Home</span>
           </Link>
-          <Link href="/notifications" className={`nav-item${location === "/notifications" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)} aria-label={notificationLabel}>
-            <Bell size={19} strokeWidth={1.8} /><span>Notifications</span>{notificationBadge}
-          </Link>
           <Link href="/goals" className={`nav-item${location === "/goals" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
             <Flag size={19} strokeWidth={1.8} /><span>Goals</span>
           </Link>
