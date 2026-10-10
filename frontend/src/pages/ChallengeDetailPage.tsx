@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "wouter";
 import { ArrowLeft, CalendarClock, Crown, Trash2, Trophy, UserPlus } from "lucide-react";
-import { deleteChallenge, getChallenge, inviteToChallenge, respondToChallenge, updateChallengeProgress } from "../api/challenges";
+import { deleteChallenge, getChallenge, inviteToChallenge, joinChallenge, respondToChallenge, updateChallengeProgress } from "../api/challenges";
 import { getUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 import Avatar from "../components/Avatar";
@@ -98,6 +98,7 @@ export default function ChallengeDetailPage() {
         <p className="goals-intro">{challenge.description || "A shared effort, tracked together."}</p>
       </div>
       {isHost && <button className="icon-button challenge-delete" type="button" onClick={() => void removeChallenge()} aria-label="Delete challenge" title="Delete challenge"><Trash2 size={17} /></button>}
+      {!membership && challenge.is_public && <button className="button button-primary" type="button" disabled={busy} onClick={() => void run(() => joinChallenge(challenge.id))}>Join challenge</button>}
     </header>
 
     <div className="goals-overview challenge-facts">

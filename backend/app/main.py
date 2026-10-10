@@ -12,7 +12,12 @@ from app.auth.router import router as auth_router
 from app.challenges.router import router as challenges_router
 from app.config.settings import settings
 from app.database.database import Base, engine
-from app.database.migrations import migrate_lift_weights, migrate_post_activity, migrate_user_profile_image
+from app.database.migrations import (
+    migrate_challenge_visibility,
+    migrate_lift_weights,
+    migrate_post_activity,
+    migrate_user_profile_image,
+)
 from app.database import models
 from app.posts.router import router as posts_router
 from app.goals.router import router as goals_router
@@ -29,6 +34,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     migrate_lift_weights(engine)
     migrate_post_activity(engine)
     migrate_user_profile_image(engine)
+    migrate_challenge_visibility(engine)
     yield
 
 

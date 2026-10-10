@@ -18,6 +18,8 @@ export interface Challenge {
   target_value: number | null;
   unit: string | null;
   deadline: string | null;
+  is_public: boolean;
+  max_participants: number | null;
   created_at: string;
   participants: ChallengeParticipant[];
 }
@@ -29,4 +31,6 @@ export interface ChallengeCreateInput {
   unit: string | null;
   deadline: string | null;
   invites: string[];
+  is_public: boolean;
+  max_participants: number | null;
 }

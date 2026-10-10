@@ -80,3 +80,26 @@ def migrate_user_profile_image(db_engine: Engine = engine) -> None:
         columns = {column[1] for column in connection.exec_driver_sql("PRAGMA table_info(users)").fetchall()}
         if "profile_image" not in columns:
             connection.exec_driver_sql("ALTER TABLE users ADD COLUMN profile_image VARCHAR(255)")
+
+
+def migrate_challenge_visibility(db_engine: Engine = engine) -> None:
+    if db_engine.dialect.name not in {"sqlite", "postgresql"}:
+        return
+
+    with db_engine.begin() as connection:
+        if db_engine.dialect.name == "postgresql":
+            connection.exec_driver_sql(
+                "ALTER TABLE challenges ADD COLUMN IF NOT EXISTS is_public BOOLEAN NOT NULL DEFAULT FALSE"
+            )
+            connection.exec_driver_sql(
+                "ALTER TABLE challenges ADD COLUMN IF NOT EXISTS max_participants INTEGER"
+            )
+            return
+
+        columns = {column[1] for column in connection.exec_driver_sql("PRAGMA table_info(challenges)").fetchall()}
+        if "is_public" not in columns:
+            connection.exec_driver_sql(
+                "ALTER TABLE challenges ADD COLUMN is_public BOOLEAN NOT NULL DEFAULT 0"
+            )
+        if "max_participants" not in columns:
+            connection.exec_driver_sql("ALTER TABLE challenges ADD COLUMN max_participants INTEGER")

@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import datetime, timezone
+from typing import Literal
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, selectinload
 
@@ -33,7 +36,7 @@ def get_accessible_challenge(db: Session, challenge_id: int, user: User) -> Chal
     challenge = db.scalar(challenge_query().where(Challenge.id == challenge_id))
     if challenge is None:
         raise HTTPException(status_code=404, detail="Challenge not found.")
-    if challenge.host_id != user.id and all(p.user_id != user.id for p in challenge.participants):
+    if not challenge.is_public and challenge.host_id != user.id and all(p.user_id != user.id for p in challenge.participants):
         raise HTTPException(status_code=404, detail="Challenge not found.")
     return challenge
 
@@ -63,6 +66,8 @@ def serialize(challenge: Challenge) -> ChallengeRead:
         target_value=challenge.target_value,
         unit=challenge.unit,
         deadline=challenge.deadline,
+        is_public=challenge.is_public,
+        max_participants=challenge.max_participants,
         created_at=challenge.created_at,
         participants=[
             ParticipantRead(
@@ -92,6 +97,27 @@ def list_challenges(db: Session = Depends(get_db), user: User = Depends(get_curr
     return [serialize(challenge) for challenge in challenges]
 
 
+@router.get("/discover", response_model=list[ChallengeRead])
+def discover_challenges(
+    sort: Literal["newest", "popular"] = "newest",
+    limit: int = Query(default=6, ge=1, le=50),
+    db: Session = Depends(get_db),
+) -> list[ChallengeRead]:
+    challenges = db.scalars(challenge_query().where(Challenge.is_public.is_(True))).all()
+    now = datetime.now(timezone.utc)
+    active = [
+        challenge for challenge in challenges
+        if challenge.deadline is None
+        or (challenge.deadline.replace(tzinfo=timezone.utc) if challenge.deadline.tzinfo is None else challenge.deadline) >= now
+    ]
+    if sort == "popular":
+        active.sort(
+            key=lambda challenge: sum(participant.status == "accepted" for participant in challenge.participants),
+            reverse=True,
+        )
+    return [serialize(challenge) for challenge in active[:limit]]
+
+
 @router.post("", response_model=ChallengeRead, status_code=status.HTTP_201_CREATED)
 def create_challenge(payload: ChallengeCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> ChallengeRead:
     challenge = Challenge(
@@ -101,11 +127,16 @@ def create_challenge(payload: ChallengeCreate, db: Session = Depends(get_db), us
         target_value=payload.target_value,
         unit=payload.unit,
         deadline=payload.deadline,
+        is_public=payload.is_public,
+        max_participants=payload.max_participants,
         participants=[ChallengeParticipant(user_id=user.id, status="accepted")],
     )
-    for invitee in resolve_usernames(db, payload.invites):
-        if invitee.id != user.id:
-            challenge.participants.append(ChallengeParticipant(user_id=invitee.id, status="invited"))
+    invitees = resolve_usernames(db, payload.invites)
+    invitees = [invitee for invitee in invitees if invitee.id != user.id]
+    if challenge.is_public and 1 + len(invitees) > challenge.max_participants:
+        raise HTTPException(status_code=409, detail="Invites would exceed the participant limit.")
+    for invitee in invitees:
+        challenge.participants.append(ChallengeParticipant(user_id=invitee.id, status="invited"))
     db.add(challenge)
     db.commit()
     return serialize(get_accessible_challenge(db, challenge.id, user))
@@ -116,15 +147,47 @@ def get_challenge(challenge_id: int, db: Session = Depends(get_db), user: User =
     return serialize(get_accessible_challenge(db, challenge_id, user))
 
 
+@router.post("/{challenge_id}/join", response_model=ChallengeRead)
+def join_challenge(
+    challenge_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> ChallengeRead:
+    challenge = db.scalar(challenge_query().where(Challenge.id == challenge_id))
+    if challenge is None or not challenge.is_public:
+        raise HTTPException(status_code=404, detail="Public challenge not found.")
+    if challenge.deadline is not None:
+        deadline = challenge.deadline.replace(tzinfo=timezone.utc) if challenge.deadline.tzinfo is None else challenge.deadline
+        if deadline < datetime.now(timezone.utc):
+            raise HTTPException(status_code=409, detail="This challenge has ended.")
+    participant = get_participant(challenge, user)
+    if participant is not None and participant.status == "accepted":
+        return serialize(challenge)
+    if challenge.max_participants is not None:
+        occupying = sum(item.status in {"accepted", "invited"} for item in challenge.participants)
+        if occupying >= challenge.max_participants and (participant is None or participant.status != "invited"):
+            raise HTTPException(status_code=409, detail="This challenge is full.")
+    if participant is None:
+        challenge.participants.append(ChallengeParticipant(user_id=user.id, status="accepted"))
+    else:
+        participant.status = "accepted"
+    db.commit()
+    return serialize(get_accessible_challenge(db, challenge_id, user))
+
+
 @router.post("/{challenge_id}/invite", response_model=ChallengeRead)
 def invite_members(challenge_id: int, payload: ChallengeInvite, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> ChallengeRead:
     challenge = get_accessible_challenge(db, challenge_id, user)
     if challenge.host_id != user.id:
         raise HTTPException(status_code=403, detail="Only the host can invite members.")
     existing_ids = {p.user_id for p in challenge.participants}
-    for invitee in resolve_usernames(db, payload.usernames):
-        if invitee.id not in existing_ids:
-            challenge.participants.append(ChallengeParticipant(user_id=invitee.id, status="invited"))
+    invitees = [invitee for invitee in resolve_usernames(db, payload.usernames) if invitee.id not in existing_ids]
+    if challenge.is_public and challenge.max_participants is not None:
+        occupying = sum(item.status in {"accepted", "invited"} for item in challenge.participants)
+        if occupying + len(invitees) > challenge.max_participants:
+            raise HTTPException(status_code=409, detail="Invites would exceed the participant limit.")
+    for invitee in invitees:
+        challenge.participants.append(ChallengeParticipant(user_id=invitee.id, status="invited"))
     db.commit()
     return serialize(get_accessible_challenge(db, challenge_id, user))
 

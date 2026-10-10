@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class ChallengeCreate(BaseModel):
@@ -10,6 +10,16 @@ class ChallengeCreate(BaseModel):
     unit: str | None = Field(default=None, max_length=30)
     deadline: datetime | None = None
     invites: list[str] = Field(default_factory=list, max_length=50)
+    is_public: bool = False
+    max_participants: int | None = Field(default=None, ge=2, le=500)
+
+    @model_validator(mode="after")
+    def validate_visibility(self) -> "ChallengeCreate":
+        if self.is_public and self.max_participants is None:
+            raise ValueError("Public challenges need a participant limit.")
+        if not self.is_public and self.max_participants is not None:
+            raise ValueError("Private challenges do not have a participant limit.")
+        return self
 
     @field_validator("title")
     @classmethod
@@ -64,5 +74,7 @@ class ChallengeRead(BaseModel):
     target_value: float | None
     unit: str | None
     deadline: datetime | None
+    is_public: bool
+    max_participants: int | None
     created_at: datetime
     participants: list[ParticipantRead]

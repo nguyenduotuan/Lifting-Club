@@ -1,42 +1,59 @@
-import { Activity, ArrowUpRight, Bell, CalendarDays, Flag, Plus, Trophy, UserRound } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Flame, Trophy } from "lucide-react";
 import { Link } from "wouter";
+import { getPublicChallenges } from "../api/challenges";
 import { useAuth } from "../hooks/useAuth";
+import { ChallengeCard } from "./ChallengesPage";
+import type { Challenge } from "../types/challenge";
 
 export default function PortalPage() {
   const { user } = useAuth();
-  const destinations = [
-    { href: "/feed", number: "01", label: "FYP", description: "Catch up on what your circle is sharing.", icon: Activity },
-    { href: "/challenges", number: "02", label: "Challenges", description: "See what's in motion and take part.", icon: Trophy },
-    { href: "/goals", number: "03", label: "Goals & milestones", description: "Keep track of progress and celebrate wins.", icon: Flag },
-    { href: "/events", number: "04", label: "Events", description: "Find plans and moments with your circle.", icon: CalendarDays },
-    { href: "/notifications", number: "05", label: "Notifications", description: "See invitations waiting for your response.", icon: Bell },
-    { href: "/create", number: "06", label: "Post", description: "Add a moment, session, or small victory.", icon: Plus },
-    { href: `/profile/${user?.username ?? ""}`, number: "07", label: "Your profile", description: "Revisit your posts and personal progress.", icon: UserRound },
-  ];
+  const [latest, setLatest] = useState<Challenge[]>([]);
+  const [hot, setHot] = useState<Challenge[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    Promise.all([getPublicChallenges("newest"), getPublicChallenges("popular")])
+      .then(([newChallenges, popularChallenges]) => { setLatest(newChallenges); setHot(popularChallenges); })
+      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Challenges could not be loaded."))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <section className="page-column portal-page">
       <header className="portal-heading">
-        <p className="eyebrow">THE CIRCLE, AT A GLANCE</p>
-        <h1>Your circuit<span className="heading-period">.</span></h1>
-        <p>Everything you and your people are building, all in one place.</p>
+        <p className="eyebrow">WHAT'S MOVING</p>
+        <h1>Club pulse<span className="heading-period">.</span></h1>
+        <p>Fresh challenges, popular pursuits, and updates from the club.</p>
       </header>
 
-      <section className="portal-section" aria-labelledby="portal-destinations-heading">
+      <section className="portal-section" aria-labelledby="portal-latest-heading">
         <div className="portal-section-heading">
-          <h2 id="portal-destinations-heading">Pick up where you like</h2>
-          <span>YOUR PLACES</span>
+          <h2 id="portal-latest-heading"><Trophy size={17} /> New challenges</h2>
+          <Link href="/challenges">Explore all</Link>
         </div>
-        <nav className="portal-destinations" aria-label="Explore Circuit">
-          {destinations.map(({ href, number, label, description, icon: Icon }) => (
-            <Link className="portal-destination" href={href} key={href}>
-              <span className="portal-destination-number">{number}</span>
-              <span className="portal-destination-icon"><Icon size={19} strokeWidth={1.8} /></span>
-              <span className="portal-destination-copy"><strong>{label}</strong><small>{description}</small></span>
-              <ArrowUpRight className="portal-destination-arrow" size={18} />
-            </Link>
-          ))}
-        </nav>
+        {loading && <div className="state-message">Finding the latest challenges<span className="loading-dots">...</span></div>}
+        {!loading && error && <div className="state-message state-error">{error}</div>}
+        {!loading && !error && latest.length === 0 && <p className="portal-empty">No public challenges yet.</p>}
+        {!loading && !error && latest.length > 0 && <div className="goal-grid portal-challenge-grid">{latest.slice(0, 3).map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>}
+      </section>
+
+      <section className="portal-section" aria-labelledby="portal-hot-heading">
+        <div className="portal-section-heading">
+          <h2 id="portal-hot-heading"><Flame size={17} /> Hot right now</h2>
+          <span>BY PARTICIPANTS</span>
+        </div>
+        {!loading && hot.length === 0 && <p className="portal-empty">Popular challenges will show here.</p>}
+        {!loading && hot.length > 0 && <div className="goal-grid portal-challenge-grid">{hot.slice(0, 3).map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>}
+      </section>
+
+      <section className="portal-section" aria-labelledby="portal-news-heading">
+        <div className="portal-section-heading">
+          <h2 id="portal-news-heading">Club news</h2>
+          <span>UPDATES</span>
+        </div>
+        <p className="portal-empty">No club updates yet.</p>
       </section>
     </section>
   );

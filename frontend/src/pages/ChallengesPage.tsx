@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
-import { CalendarClock, ChevronRight, Plus, Trophy, Users } from "lucide-react";
-import { createChallenge, getChallenges, respondToChallenge } from "../api/challenges";
+import { CalendarClock, ChevronRight, Globe2, Plus, Trophy, Users } from "lucide-react";
+import { createChallenge, getChallenges, getPublicChallenges, joinChallenge, respondToChallenge } from "../api/challenges";
 import { getUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 import MemberPicker from "../components/MemberPicker";
@@ -15,6 +15,8 @@ const emptyForm: ChallengeCreateInput = {
   unit: null,
   deadline: null,
   invites: [],
+  is_public: false,
+  max_participants: null,
 };
 
 function formatDeadline(deadline: string | null): string {
@@ -41,7 +43,7 @@ export function ChallengeCard({ challenge, userId, action }: { challenge: Challe
 
   return <article className={`goal-card challenge-card${isPast(challenge.deadline) ? " challenge-card-past" : ""}`}>
     <div className="goal-card-top">
-      <span className="goal-category">{challenge.host_id === userId ? "HOSTING" : membership?.status === "invited" ? "INVITED" : "JOINED"}</span>
+      <span className="goal-category">{challenge.host_id === userId ? "HOSTING" : membership?.status === "invited" ? "INVITED" : membership?.status === "accepted" ? "JOINED" : challenge.is_public ? "PUBLIC" : "JOINED"}</span>
       <span className="challenge-deadline"><CalendarClock size={13} /> {formatDeadline(challenge.deadline)}</span>
     </div>
     <Link href={`/challenges/${challenge.id}`} className="goal-title-row challenge-title-link">
@@ -49,7 +51,7 @@ export function ChallengeCard({ challenge, userId, action }: { challenge: Challe
       <div><h2>{challenge.title}</h2><p>{challenge.description || "A shared effort, tracked together."}</p></div>
     </Link>
     <div className="goal-meta">
-      <span><Users size={13} /> {accepted.length} in</span>
+      <span><Users size={13} /> {accepted.length}{challenge.max_participants !== null ? ` / ${challenge.max_participants}` : ""} in</span>
       {challenge.target_value !== null && <span>Goal: {challenge.target_value} {challenge.unit ?? ""}</span>}
       {top && top.current_value > 0 && <span>Leader: {top.display_name}</span>}
     </div>
@@ -64,6 +66,7 @@ export function ChallengeCard({ challenge, userId, action }: { challenge: Challe
 export default function ChallengesPage() {
   const { user } = useAuth();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [publicChallenges, setPublicChallenges] = useState<Challenge[]>([]);
   const [members, setMembers] = useState<User[]>([]);
   const [form, setForm] = useState<ChallengeCreateInput>(emptyForm);
   const [showForm, setShowForm] = useState(false);
@@ -76,6 +79,7 @@ export default function ChallengesPage() {
       .then(setChallenges)
       .catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Challenges could not be loaded."))
       .finally(() => setLoading(false));
+    getPublicChallenges("newest", 50).then(setPublicChallenges).catch(() => setPublicChallenges([]));
     getUsers().then(setMembers).catch(() => setMembers([]));
   }, []);
 
@@ -90,6 +94,17 @@ export default function ChallengesPage() {
       setChallenges((current) => current.map((item) => item.id === updated.id ? updated : item));
     } catch (respondError) {
       setError(respondError instanceof Error ? respondError.message : "The invite could not be answered.");
+    }
+  }
+
+  async function join(challenge: Challenge) {
+    setError("");
+    try {
+      const updated = await joinChallenge(challenge.id);
+      setPublicChallenges((current) => current.map((item) => item.id === updated.id ? updated : item));
+      setChallenges((current) => [updated, ...current.filter((item) => item.id !== updated.id)]);
+    } catch (joinError) {
+      setError(joinError instanceof Error ? joinError.message : "Could not join this challenge.");
     }
   }
 
@@ -127,6 +142,15 @@ export default function ChallengesPage() {
         <div><label className="field-label" htmlFor="challenge-target">Target <span>OPTIONAL</span></label><input id="challenge-target" type="number" min="0.01" step="any" value={form.target_value ?? ""} onChange={(event) => setForm({ ...form, target_value: Number(event.target.value) || null })} placeholder="100" /></div>
         <div><label className="field-label" htmlFor="challenge-unit">Unit <span>OPTIONAL</span></label><input id="challenge-unit" value={form.unit ?? ""} onChange={(event) => setForm({ ...form, unit: event.target.value || null })} placeholder="km, sessions, kg..." maxLength={30} /></div>
       </div>
+      <label className="challenge-visibility-toggle">
+        <input type="checkbox" checked={form.is_public} onChange={(event) => setForm({ ...form, is_public: event.target.checked, max_participants: event.target.checked ? form.max_participants ?? 20 : null })} />
+        <Globe2 size={16} />
+        <span>Make this challenge public</span>
+      </label>
+      {form.is_public && <div className="challenge-capacity-field">
+        <label className="field-label" htmlFor="challenge-capacity">Participant limit</label>
+        <input id="challenge-capacity" type="number" min="2" max="500" step="1" required value={form.max_participants ?? 20} onChange={(event) => setForm({ ...form, max_participants: Number(event.target.value) || 2 })} />
+      </div>}
       {inviteable.length > 0 && <div className="challenge-invite-picker">
         <p className="goal-section-label">INVITE MEMBERS</p>
         <MemberPicker members={inviteable} selected={form.invites} onChange={(invites) => setForm((current) => ({ ...current, invites }))} />
@@ -137,7 +161,7 @@ export default function ChallengesPage() {
 
     {loading && <div className="state-message">Opening the arena<span className="loading-dots">...</span></div>}
     {!loading && error && !showForm && <div className="state-message state-error">{error}</div>}
-    {!loading && challenges.length === 0 && !showForm && <div className="goals-empty">
+    {!loading && challenges.length === 0 && publicChallenges.length === 0 && !showForm && <div className="goals-empty">
       <span className="goals-empty-mark"><Trophy size={23} /></span>
       <p className="eyebrow">NO CROWDS YET</p>
       <h2>Start something worth<br />showing up for.</h2>
@@ -157,6 +181,16 @@ export default function ChallengesPage() {
     {!loading && active.length > 0 && <section className="goal-category-section">
       <div className="goal-category-heading"><span>In progress</span><i /></div>
       <div className="goal-grid">{active.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>
+    </section>}
+
+    {!loading && publicChallenges.length > 0 && <section className="goal-category-section">
+      <div className="goal-category-heading"><span>Open to everyone</span><i /></div>
+      <div className="goal-grid">{publicChallenges.filter((challenge) => {
+        const membership = myMembership(challenge, user?.id);
+        return !membership || membership.status === "declined";
+      }).map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} action={
+        <button className="button button-secondary" type="button" onClick={() => void join(challenge)}>Join challenge</button>
+      } />)}</div>
     </section>}
 
     {!loading && past.length > 0 && <section className="goal-category-section">

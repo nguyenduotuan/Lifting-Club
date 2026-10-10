@@ -54,6 +54,15 @@
 .portal-section { padding-top: 27px; }
 .portal-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .portal-section-heading h2 { margin: 0; color: #e3e4e8; font-family: var(--display); font-size: 20px; font-weight: 500; }
+.portal-section-heading h2 { display: flex; align-items: center; gap: 8px; }
+.portal-section-heading > a { color: var(--muted); font-size: 11px; text-decoration: none; }
+.portal-section-heading > a:hover { color: var(--text); }
+.portal-challenge-grid { grid-template-columns: 1fr; }
+.portal-empty { margin: 0; padding: 15px 0; color: var(--quiet); font-size: 12px; }
+.challenge-visibility-toggle { display: flex; width: fit-content; align-items: center; gap: 9px; margin: 16px 0 12px; color: var(--muted); font-size: 12px; cursor: pointer; }
+.challenge-visibility-toggle input { width: 16px; height: 16px; margin: 0; accent-color: #b7bbc3; }
+.challenge-capacity-field { max-width: 220px; margin: 0 0 12px; }
+.challenge-capacity-field input { width: 100%; }
 .portal-section-heading > span { color: var(--quiet); font-size: 8px; font-weight: 600; letter-spacing: .13em; }
 .portal-destinations { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .portal-destination { display: grid; min-width: 0; min-height: 94px; grid-template-columns: 22px 38px minmax(0, 1fr) 18px; align-items: center; gap: 11px; padding: 14px 13px; border: 1px solid var(--line); border-radius: 5px; background: rgba(222, 223, 228, .025); transition: border-color .18s, background .18s, transform .18s; animation: login-arrive .4s both; }

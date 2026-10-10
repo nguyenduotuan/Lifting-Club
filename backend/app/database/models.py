@@ -153,6 +153,7 @@ class Challenge(Base):
     __tablename__ = "challenges"
     __table_args__ = (
         CheckConstraint("target_value IS NULL OR target_value > 0", name="ck_challenges_target_positive"),
+        CheckConstraint("max_participants IS NULL OR max_participants >= 2", name="ck_challenges_max_participants"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -162,6 +163,8 @@ class Challenge(Base):
     target_value: Mapped[float | None] = mapped_column(Float, nullable=True)
     unit: Mapped[str | None] = mapped_column(String(30), nullable=True)
     deadline: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    is_public: Mapped[bool] = mapped_column(default=False)
+    max_participants: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
     host: Mapped[User] = relationship()
     participants: Mapped[list["ChallengeParticipant"]] = relationship(

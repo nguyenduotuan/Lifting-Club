@@ -5,12 +5,20 @@ export function getChallenges(): Promise<Challenge[]> {
   return request<Challenge[]>("/challenges");
 }
 
+export function getPublicChallenges(sort: "newest" | "popular" = "newest", limit = 6): Promise<Challenge[]> {
+  return request<Challenge[]>(`/challenges/discover?sort=${sort}&limit=${limit}`);
+}
+
 export function getChallenge(challengeId: number): Promise<Challenge> {
   return request<Challenge>(`/challenges/${challengeId}`);
 }
 
 export function createChallenge(payload: ChallengeCreateInput): Promise<Challenge> {
   return request<Challenge>("/challenges", jsonBody(payload));
+}
+
+export function joinChallenge(challengeId: number): Promise<Challenge> {
+  return request<Challenge>(`/challenges/${challengeId}/join`, { method: "POST" });
 }
 
 export function inviteToChallenge(challengeId: number, usernames: string[]): Promise<Challenge> {
