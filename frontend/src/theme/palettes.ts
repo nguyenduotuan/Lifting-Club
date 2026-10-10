@@ -53,6 +53,21 @@ const monochrome: Palette = {
   glow: noGlow,
 };
 
+const blackGold: Palette = {
+  bg: "#10100e", surface: "#191916", "surface-raised": "#24231e", "surface-sunk": "#0b0b09", "surface-high": "#51462b",
+  line: rgba("226, 190, 112", 0.14), "line-strong": rgba("226, 190, 112", 0.28),
+  text: "#f2eee3", muted: "#c0b89f", quiet: "#928a75",
+  ...textRamp(["#fffdf6", "#f2eee3", "#ded7c4", "#c0b89f", "#a59b80", "#81775f"]),
+  accent: "#d9b45b", "accent-strong": "#f5d88a", "accent-dark": "#a78332", "on-accent": "#17130a",
+  error: "#e58b7f", "error-rgb": "229, 139, 127",
+  "ink-rgb": "226, 190, 112", "shade-rgb": "8, 8, 6", "panel-rgb": "25, 25, 22", "shadow-rgb": "0, 0, 0",
+  ...tint("green", { rgb: "37, 91, 64", line: "112, 176, 132", text: "#a4d1ae" }),
+  ...tint("gold", { rgb: "112, 83, 27", line: "226, 190, 112", text: "#f0d58d" }),
+  ...tint("blue", { rgb: "43, 71, 99", line: "111, 151, 188", text: "#a9c8e2" }),
+  ...tint("red", { rgb: "102, 45, 38", line: "196, 112, 99", text: "#e2a79b" }),
+  glow: "0 0 16px rgba(217, 180, 91, 0.28)",
+};
+
 const magenta: Palette = {
   bg: "#10091b", surface: "#1b102b", "surface-raised": "#28163d", "surface-sunk": "#0b0612", "surface-high": "#522b73",
   line: rgba("207, 126, 255", 0.16), "line-strong": rgba("207, 126, 255", 0.32),
@@ -115,6 +130,7 @@ const dracula: Palette = {
 
 export const themes = [
   { id: "monochrome", name: "Monochrome", description: "Crisp white, soft gray, and bold black", swatch: "#202020", colorScheme: "light", palette: monochrome },
+  { id: "black-gold", name: "Black Gold", description: "Warm gold accents on a deep black finish", swatch: "#d9b45b", colorScheme: "dark", palette: blackGold },
   { id: "magenta", name: "Magenta", description: "Shiny violet neon on a deep night backdrop", swatch: "#d946ff", colorScheme: "dark", palette: magenta },
   { id: "kawaii", name: "Kawaii", description: "Cute, soft pink with a rosy glow", swatch: "#ec5b9b", colorScheme: "light", palette: kawaii },
   { id: "baby-blue", name: "Baby Blue", description: "A bright, airy light theme", swatch: "#89cff0", colorScheme: "light", palette: babyBlue },
