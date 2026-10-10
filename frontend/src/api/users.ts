@@ -13,3 +13,11 @@ export function getUser(username: string): Promise<UserProfile> {
 export function getUserPosts(username: string): Promise<Post[]> {
   return request<Post[]>(`/users/${encodeURIComponent(username)}/posts`);
 }
+
+export function updateDisplayName(displayName: string): Promise<User> {
+  return request<User>("/users/me", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ display_name: displayName }),
+  });
+}

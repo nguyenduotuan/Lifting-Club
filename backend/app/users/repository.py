@@ -18,6 +18,13 @@ class UserRepository:
         return db.get(User, user_id)
 
     @staticmethod
+    def update_display_name(db: Session, user: User, display_name: str) -> User:
+        user.display_name = display_name
+        db.commit()
+        db.refresh(user)
+        return user
+
+    @staticmethod
     def create(db: Session, username: str, password_hash: str, display_name: str) -> User:
         user = User(username=username, password_hash=password_hash, display_name=display_name)
         db.add(user)

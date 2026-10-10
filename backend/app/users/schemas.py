@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class UserRead(BaseModel):
@@ -15,3 +15,7 @@ class UserRead(BaseModel):
 
 class UserProfile(UserRead):
     post_count: int
+
+
+class UserUpdate(BaseModel):
+    display_name: str = Field(min_length=1, max_length=80)

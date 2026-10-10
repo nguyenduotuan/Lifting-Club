@@ -131,6 +131,13 @@
 .profile-header { display: flex; align-items: center; gap: 22px; padding: 15px 0 24px; border-bottom: 1px solid var(--line); }
 .profile-identity { min-width: 0; }
 .profile-identity h1 { overflow-wrap: anywhere; margin: 8px 0 3px; color: #ededef; font-family: var(--display); font-size: 27px; font-weight: 500; }
+.profile-name-row, .profile-name-form { display: flex; align-items: center; gap: 7px; }
+.profile-name-row h1 { flex: 0 1 auto; }
+.profile-name-row .icon-button, .profile-name-form .icon-button { width: 29px; height: 29px; flex-basis: 29px; }
+.profile-name-form { margin-top: 8px; }
+.profile-name-form input { width: min(100%, 300px); height: 38px; padding: 0 10px; color: var(--text); border: 1px solid var(--line-strong); border-radius: 4px; outline: none; background: rgba(12, 13, 16, .28); font: inherit; font-size: 16px; }
+.profile-name-form input:focus { border-color: rgba(202, 204, 211, .65); }
+.profile-name-error { margin: 7px 0 0; color: var(--error); font-size: 11px; }
 .profile-handle { color: #a4a6ad; font-size: 12px; }
 .profile-joined { display: flex; align-items: center; gap: 6px; margin-top: 12px; color: #85868d; font-size: 10px; }
 .profile-stats { display: flex; gap: 40px; padding: 17px 4px; border-bottom: 1px solid var(--line); }
