@@ -53,6 +53,21 @@ const monochrome: Palette = {
   glow: noGlow,
 };
 
+const whiteGold: Palette = {
+  bg: "#f3f1eb", surface: "#faf9f5", "surface-raised": "#fffefa", "surface-sunk": "#e9e6dd", "surface-high": "#d3cbb9",
+  line: rgba("44, 40, 31", 0.13), "line-strong": rgba("44, 40, 31", 0.24),
+  text: "#28261f", muted: "#625d50", quiet: "#898272",
+  ...textRamp(["#181713", "#28261f", "#403d34", "#625d50", "#7a7465", "#918a79"]),
+  accent: "#a88c53", "accent-strong": "#d0bc8d", "accent-dark": "#78623a", "on-accent": "#17140e",
+  error: "#6a5f4d", "error-rgb": "106, 95, 77",
+  "ink-rgb": "38, 36, 30", "shade-rgb": "245, 243, 237", "panel-rgb": "250, 249, 245", "shadow-rgb": "31, 28, 21",
+  ...tint("green", { rgb: "142, 130, 101", line: "155, 140, 104", text: "#675a3f" }),
+  ...tint("gold", { rgb: "142, 130, 101", line: "155, 140, 104", text: "#675a3f" }),
+  ...tint("blue", { rgb: "142, 130, 101", line: "155, 140, 104", text: "#675a3f" }),
+  ...tint("red", { rgb: "142, 130, 101", line: "155, 140, 104", text: "#675a3f" }),
+  glow: "0 0 14px rgba(168, 140, 83, 0.18)",
+};
+
 const blackGold: Palette = {
   bg: "#10100e", surface: "#191916", "surface-raised": "#24231e", "surface-sunk": "#0b0b09", "surface-high": "#51462b",
   line: rgba("226, 190, 112", 0.14), "line-strong": rgba("226, 190, 112", 0.28),
@@ -130,6 +145,7 @@ const dracula: Palette = {
 
 export const themes = [
   { id: "monochrome", name: "Monochrome", description: "Crisp white, soft gray, and bold black", swatch: "#202020", colorScheme: "light", palette: monochrome },
+  { id: "white-gold", name: "White Gold", description: "A Baroque-inspired ivory, gold, and charcoal palette", swatch: "#a88c53", colorScheme: "light", palette: whiteGold },
   { id: "black-gold", name: "Black Gold", description: "Warm gold accents on a deep black finish", swatch: "#d9b45b", colorScheme: "dark", palette: blackGold },
   { id: "magenta", name: "Magenta", description: "Shiny violet neon on a deep night backdrop", swatch: "#d946ff", colorScheme: "dark", palette: magenta },
   { id: "kawaii", name: "Kawaii", description: "Cute, soft pink with a rosy glow", swatch: "#ec5b9b", colorScheme: "light", palette: kawaii },
