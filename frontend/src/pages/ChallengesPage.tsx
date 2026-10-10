@@ -32,6 +32,8 @@ function myMembership(challenge: Challenge, userId: number | undefined) {
   return challenge.participants.find((participant) => participant.user_id === userId);
 }
 
+type ChallengeCategory = "private" | "public" | "hosted";
+
 export function ChallengeCard({ challenge, userId, action }: { challenge: Challenge; userId: number | undefined; action?: React.ReactNode }) {
   const membership = myMembership(challenge, userId);
   const accepted = challenge.participants.filter((participant) => participant.status === "accepted");
@@ -73,6 +75,7 @@ export default function ChallengesPage() {
   const [members, setMembers] = useState<User[]>([]);
   const [form, setForm] = useState<ChallengeCreateInput>(emptyForm);
   const [showForm, setShowForm] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<ChallengeCategory>("private");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -86,9 +89,11 @@ export default function ChallengesPage() {
     getUsers().then(setMembers).catch(() => setMembers([]));
   }, []);
 
-  const invites = useMemo(() => challenges.filter((challenge) => myMembership(challenge, user?.id)?.status === "invited"), [challenges, user]);
+  const privateChallenges = useMemo(() => challenges.filter((challenge) => challenge.host_id !== user?.id && !challenge.is_public && ["invited", "accepted"].includes(myMembership(challenge, user?.id)?.status ?? "") && !isPast(challenge.deadline)), [challenges, user]);
   const hosted = useMemo(() => challenges.filter((challenge) => challenge.host_id === user?.id && !isPast(challenge.deadline)), [challenges, user]);
-  const joined = useMemo(() => challenges.filter((challenge) => challenge.host_id !== user?.id && myMembership(challenge, user?.id)?.status === "accepted" && !isPast(challenge.deadline)), [challenges, user]);
+  const publicVisible = useMemo(() => Array.from(new Map([...challenges, ...publicChallenges]
+    .filter((challenge) => challenge.is_public && challenge.host_id !== user?.id && !isPast(challenge.deadline))
+    .map((challenge) => [challenge.id, challenge])).values()), [challenges, publicChallenges, user]);
   const past = useMemo(() => challenges.filter((challenge) => (challenge.host_id === user?.id || myMembership(challenge, user?.id)?.status === "accepted") && isPast(challenge.deadline)), [challenges, user]);
 
   async function respond(challenge: Challenge, action: "accept" | "decline") {
@@ -96,6 +101,7 @@ export default function ChallengesPage() {
     try {
       const updated = await respondToChallenge(challenge.id, action);
       setChallenges((current) => current.map((item) => item.id === updated.id ? updated : item));
+      setPublicChallenges((current) => current.map((item) => item.id === updated.id ? updated : item));
     } catch (respondError) {
       setError(respondError instanceof Error ? respondError.message : "The invite could not be answered.");
     }
@@ -183,42 +189,42 @@ export default function ChallengesPage() {
       <button className="button button-secondary" type="button" onClick={() => setShowForm(true)}>Host your first challenge <ChevronRight size={16} /></button>
     </div>}
 
-    {!loading && invites.length > 0 && <section className="goal-category-section">
-      <div className="goal-category-heading"><span>Waiting on you</span><i /></div>
-      <div className="goal-grid">{invites.map((challenge) => (
-        <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} action={<>
+    <nav className="collection-tabs" aria-label="Challenge categories">
+      <button className="collection-tab collection-tab-private" type="button" aria-pressed={activeCategory === "private"} onClick={() => setActiveCategory("private")}>Private <span>{privateChallenges.length}</span></button>
+      <button className="collection-tab collection-tab-public" type="button" aria-pressed={activeCategory === "public"} onClick={() => setActiveCategory("public")}>Public <span>{publicVisible.length}</span></button>
+      <button className="collection-tab collection-tab-hosted" type="button" aria-pressed={activeCategory === "hosted"} onClick={() => setActiveCategory("hosted")}>Hosted by you <span>{hosted.length}</span></button>
+    </nav>
+
+    {!loading && <section className={`collection-panel collection-panel-${activeCategory}`}>
+      {activeCategory === "private" && <>
+        <div className="goal-category-heading"><span>Private challenges &amp; invitations</span><i /></div>
+        {privateChallenges.length === 0 && <p className="collection-empty">No private challenges yet. Accept an invite or create one for your members.</p>}
+        <div className="goal-grid">{privateChallenges.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} action={myMembership(challenge, user?.id)?.status === "invited" ? <>
           <button className="button button-secondary" type="button" onClick={() => void respond(challenge, "accept")}>Accept</button>
           <button className="text-button" type="button" onClick={() => void respond(challenge, "decline")}>Decline</button>
-        </>} />
-      ))}</div>
+        </> : <button className="text-button" type="button" onClick={() => void leave(challenge)}>Leave challenge</button>} />)}</div>
+      </>}
+      {activeCategory === "public" && <>
+        <div className="goal-category-heading"><span>Open to everyone</span><i /></div>
+        {publicVisible.length === 0 && <p className="collection-empty">No public challenges to show right now.</p>}
+        <div className="goal-grid">{publicVisible.map((challenge) => {
+          const status = myMembership(challenge, user?.id)?.status;
+          return <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} action={status === "invited" ? <>
+            <button className="button button-secondary" type="button" onClick={() => void respond(challenge, "accept")}>Accept</button>
+            <button className="text-button" type="button" onClick={() => void respond(challenge, "decline")}>Decline</button>
+          </> : status === "accepted" ? <button className="text-button" type="button" onClick={() => void leave(challenge)}>Leave challenge</button> : <button className="button button-secondary" type="button" onClick={() => void join(challenge)}>Join challenge</button>} />;
+        })}</div>
+      </>}
+      {activeCategory === "hosted" && <>
+        <div className="goal-category-heading"><span>Created by you</span><i /></div>
+        {hosted.length === 0 && <p className="collection-empty">Challenges you create will appear here.</p>}
+        <div className="goal-grid">{hosted.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} action={myMembership(challenge, user?.id)?.status === "accepted"
+          ? <button className="text-button" type="button" onClick={() => void leave(challenge)}>Leave challenge</button>
+          : <button className="button button-secondary" type="button" onClick={() => void join(challenge)}>Rejoin challenge</button>} />)}</div>
+      </>}
     </section>}
 
-    {!loading && hosted.length > 0 && <section className="goal-category-section">
-      <div className="goal-category-heading"><span>Hosted by you</span><i /></div>
-      <div className="goal-grid">{hosted.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} action={myMembership(challenge, user?.id)?.status === "accepted"
-        ? <button className="text-button" type="button" onClick={() => void leave(challenge)}>Leave challenge</button>
-        : <button className="button button-secondary" type="button" onClick={() => void join(challenge)}>Rejoin challenge</button>} />)}</div>
-    </section>}
-
-    {!loading && joined.length > 0 && <section className="goal-category-section">
-      <div className="goal-category-heading"><span>Challenges you joined</span><i /></div>
-      <div className="goal-grid">{joined.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} action={<button className="text-button" type="button" onClick={() => void leave(challenge)}>Leave challenge</button>} />)}</div>
-    </section>}
-
-    {!loading && publicChallenges.some((challenge) => {
-      const membership = myMembership(challenge, user?.id);
-      return !membership || membership.status === "declined";
-    }) && <section className="goal-category-section">
-      <div className="goal-category-heading"><span>Public challenges</span><i /></div>
-      <div className="goal-grid">{publicChallenges.filter((challenge) => {
-        const membership = myMembership(challenge, user?.id);
-        return !membership || membership.status === "declined";
-      }).map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} action={
-        <button className="button button-secondary" type="button" onClick={() => void join(challenge)}>Join challenge</button>
-      } />)}</div>
-    </section>}
-
-    {!loading && past.length > 0 && <section className="goal-category-section">
+    {!loading && past.length > 0 && <section className="goal-category-section collection-past">
       <div className="goal-category-heading"><span>Past challenges</span><i /></div>
       <div className="goal-grid">{past.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>
     </section>}

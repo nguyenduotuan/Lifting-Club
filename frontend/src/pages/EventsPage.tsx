@@ -32,6 +32,8 @@ function formatDate(date: string): string {
   });
 }
 
+type EventCategory = "private" | "public" | "hosted";
+
 function EventCard({ event, userId, action }: { event: ClubEvent; userId: number | undefined; action?: React.ReactNode }) {
   const accepted = event.participants.filter((participant) => participant.status === "accepted").length;
   const state = membership(event, userId)?.status;
@@ -62,6 +64,7 @@ export default function EventsPage() {
   const [members, setMembers] = useState<User[]>([]);
   const [form, setForm] = useState<EventCreateInput>(emptyForm);
   const [showForm, setShowForm] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<EventCategory>("private");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [busyEventId, setBusyEventId] = useState<number | null>(null);
@@ -85,14 +88,12 @@ export default function EventsPage() {
     getUsers().then(setMembers).catch(() => setMembers([]));
   }, []);
 
-  const invitations = useMemo(() => events.filter((event) => membership(event, user?.id)?.status === "invited"), [events, user]);
+  const privateVisible = useMemo(() => events.filter((event) => event.host_id !== user?.id && !event.is_public && ["invited", "accepted"].includes(membership(event, user?.id)?.status ?? "") && !eventHasEnded(event)), [events, user]);
   const hosted = useMemo(() => events.filter((event) => event.host_id === user?.id && !eventHasEnded(event)), [events, user]);
-  const joined = useMemo(() => events.filter((event) => event.host_id !== user?.id && membership(event, user?.id)?.status === "accepted" && !eventHasEnded(event)), [events, user]);
+  const publicVisible = useMemo(() => Array.from(new Map([...events, ...publicEvents]
+    .filter((event) => event.is_public && event.host_id !== user?.id && !eventHasEnded(event))
+    .map((event) => [event.id, event])).values()), [events, publicEvents, user]);
   const past = useMemo(() => events.filter((event) => (event.host_id === user?.id || membership(event, user?.id)?.status === "accepted") && eventHasEnded(event)), [events, user]);
-  const discover = publicEvents.filter((event) => {
-    const state = membership(event, user?.id)?.status;
-    return event.host_id !== user?.id && state !== "accepted" && state !== "invited";
-  });
   const inviteable = members.filter((member) => member.id !== user?.id);
 
   async function runEventAction(event: ClubEvent, action: () => Promise<ClubEvent>) {
@@ -185,35 +186,48 @@ export default function EventsPage() {
 
     {loading && <div className="state-message">Checking the calendar<span className="loading-dots">...</span></div>}
     {!loading && error && <div className="state-message state-error" role="alert">{error}<button className="text-button" type="button" onClick={() => void loadEvents()}>Try again</button></div>}
-    {!loading && invitations.length > 0 && <section className="goal-category-section">
-      <div className="goal-category-heading"><span>Waiting on you</span><i /></div>
-      <div className="goal-grid">{invitations.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={<>
-        <button className="button button-secondary" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => respondToEvent(event.id, "accept"))}>Accept</button>
-        <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => respondToEvent(event.id, "decline"))}>Decline</button>
-      </>} />)}</div>
-    </section>}
-    {!loading && hosted.length > 0 && <section className="goal-category-section">
-      <div className="goal-category-heading"><span>Hosted by you</span><i /></div>
-      <div className="goal-grid">{hosted.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={<>
-        {membership(event, user?.id)?.status === "accepted"
-          ? <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "leave")}>Leave event</button>
-          : <button className="button button-secondary" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "join")}>Rejoin event</button>}
-        <button className="icon-button event-delete" type="button" disabled={busyEventId === event.id} onClick={() => void removeEvent(event)} aria-label={`Delete ${event.title}`} title="Delete event"><Trash2 size={15} /></button>
-      </>} />)}</div>
-    </section>}
-    {!loading && joined.length > 0 && <section className="goal-category-section">
-      <div className="goal-category-heading"><span>Events you joined</span><i /></div>
-      <div className="goal-grid">{joined.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={<button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "leave")}>Leave event</button>} />)}</div>
-    </section>}
-    {!loading && discover.length > 0 && <section className="goal-category-section">
-      <div className="goal-category-heading"><span>Public events</span><i /></div>
-      <div className="goal-grid">{discover.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={<button className="button button-secondary" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => joinEvent(event.id))}>Join event</button>} />)}</div>
+    <nav className="collection-tabs" aria-label="Event categories">
+      <button className="collection-tab collection-tab-private" type="button" aria-pressed={activeCategory === "private"} onClick={() => setActiveCategory("private")}>Private <span>{privateVisible.length}</span></button>
+      <button className="collection-tab collection-tab-public" type="button" aria-pressed={activeCategory === "public"} onClick={() => setActiveCategory("public")}>Public <span>{publicVisible.length}</span></button>
+      <button className="collection-tab collection-tab-hosted" type="button" aria-pressed={activeCategory === "hosted"} onClick={() => setActiveCategory("hosted")}>Hosted by you <span>{hosted.length}</span></button>
+    </nav>
+    {!loading && <section className={`collection-panel collection-panel-${activeCategory}`}>
+      {activeCategory === "private" && <>
+        <div className="goal-category-heading"><span>Private events &amp; invitations</span><i /></div>
+        {privateVisible.length === 0 && <p className="collection-empty">Private invitations and events you join will appear here.</p>}
+        <div className="goal-grid">{privateVisible.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={membership(event, user?.id)?.status === "invited" ? <>
+          <button className="button button-secondary" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => respondToEvent(event.id, "accept"))}>Accept</button>
+          <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => respondToEvent(event.id, "decline"))}>Decline</button>
+        </> : <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "leave")}>Leave event</button>} />)}</div>
+      </>}
+      {activeCategory === "public" && <>
+        <div className="goal-category-heading"><span>Open to everyone</span><i /></div>
+        {publicVisible.length === 0 && <p className="collection-empty">No public events to show right now.</p>}
+        <div className="goal-grid">{publicVisible.map((event) => {
+          const state = membership(event, user?.id)?.status;
+          const action = state === "invited" ? <>
+            <button className="button button-secondary" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => respondToEvent(event.id, "accept"))}>Accept</button>
+            <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => respondToEvent(event.id, "decline"))}>Decline</button>
+          </> : state === "accepted" ? <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "leave")}>Leave event</button> : <button className="button button-secondary" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => joinEvent(event.id))}>Join event</button>;
+          return <EventCard key={event.id} event={event} userId={user?.id} action={action} />;
+        })}</div>
+      </>}
+      {activeCategory === "hosted" && <>
+        <div className="goal-category-heading"><span>Created by you</span><i /></div>
+        {hosted.length === 0 && <p className="collection-empty">Events you create will appear here.</p>}
+        <div className="goal-grid">{hosted.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={<>
+          {membership(event, user?.id)?.status === "accepted"
+            ? <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "leave")}>Leave event</button>
+            : <button className="button button-secondary" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "join")}>Rejoin event</button>}
+          <button className="icon-button event-delete" type="button" disabled={busyEventId === event.id} onClick={() => void removeEvent(event)} aria-label={`Delete ${event.title}`} title="Delete event"><Trash2 size={15} /></button>
+        </>} />)}</div>
+      </>}
     </section>}
     {!loading && past.length > 0 && <section className="goal-category-section">
       <div className="goal-category-heading"><span>Past events</span><i /></div>
       <div className="goal-grid">{past.map((event) => <EventCard key={event.id} event={event} userId={user?.id} />)}</div>
     </section>}
-    {!loading && !error && events.length === 0 && discover.length === 0 && <div className="goals-empty events-empty">
+    {!loading && !error && events.length === 0 && publicVisible.length === 0 && <div className="goals-empty events-empty">
       <span className="goals-empty-mark"><CalendarClock size={23} /></span><p className="eyebrow">YOUR SHARED CALENDAR</p><h2>Nothing on the calendar yet.</h2>
       <button className="button button-secondary" type="button" onClick={() => setShowForm(true)}>Create your first event</button>
     </div>}
