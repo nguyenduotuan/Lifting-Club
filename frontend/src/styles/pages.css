@@ -40,11 +40,6 @@
 .refresh-button { margin-bottom: 1px; }
 .refresh-button:hover svg { transform: rotate(35deg); }
 .refresh-button svg { transition: transform .2s ease; }
-.feed-summary { display: grid; width: min(100%, 430px); grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 15px 0 17px; border-bottom: 1px solid var(--line); }
-.feed-metric { display: grid; gap: 4px; }
-.feed-metric + .feed-metric { padding-left: 18px; border-left: 1px solid var(--line); }
-.feed-metric span { color: var(--quiet); font-size: 8px; font-weight: 600; letter-spacing: .13em; }
-.feed-metric strong { color: #e0e1e4; font-family: var(--display); font-size: 25px; font-weight: 500; line-height: 1; }
 .post-list { padding-top: 20px; }
 
 .login-page { position: relative; display: grid; min-height: 100svh; overflow: hidden; place-items: center; padding: 64px 30px 80px; isolation: isolate; background: linear-gradient(135deg, #282a2f, #15171b 54%, #202227); }
@@ -212,7 +207,7 @@
   .nav-item svg { width: 19px; height: 19px; }
   .nav-account { display: flex; margin-top: auto; }
   .app-main { min-height: 100vh; margin-left: 0; padding: 90px 22px 104px; }
-  .mobile-bottom-nav { position: fixed; z-index: 7; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(3, 1fr); height: 70px; padding: 7px 18px max(7px, env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: rgba(20, 22, 26, .96); box-shadow: 0 -12px 30px rgba(0, 0, 0, .2); backdrop-filter: blur(18px); }
+  .mobile-bottom-nav { position: fixed; z-index: 7; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(4, 1fr); height: 70px; padding: 7px 18px max(7px, env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: rgba(20, 22, 26, .96); box-shadow: 0 -12px 30px rgba(0, 0, 0, .2); backdrop-filter: blur(18px); }
   .mobile-bottom-nav-item { display: flex; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 5px; color: #85878e; border-radius: 5px; font-size: 10px; font-weight: 600; }
   .mobile-bottom-nav-item:hover { color: #dedfe3; background: rgba(222, 223, 228, .05); }
   .mobile-bottom-nav-item-active { color: #e5e6e9; }
@@ -236,8 +231,6 @@
 @media (max-width: 480px) {
   .app-main { padding: 84px 15px 104px; }
   .page-heading h1 { font-size: 30px; }
-  .feed-metric + .feed-metric { padding-left: 12px; }
-  .feed-metric span { font-size: 7px; }
   .lift-field-row { grid-template-columns: minmax(94px, 1fr) minmax(63px, 76px) 51px minmax(56px, 65px) 30px; gap: 5px; }
   .lift-field-row input, .lift-field-row select { height: 38px; padding-inline: 6px; font-size: 11px; }
   .remove-lift { width: 30px; height: 30px; flex-basis: 30px; }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Activity, CircleUserRound, Dumbbell, Flag, LogOut, Menu, Plus, Search, X } from "lucide-react";
+import { Activity, CircleUserRound, Dumbbell, Flag, Home, LogOut, Menu, Plus, Search, X } from "lucide-react";
 import { getUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 import type { User } from "../types/user";
@@ -120,6 +120,9 @@ export default function Navigation() {
         </div>
       </aside>
       <nav className="mobile-bottom-nav" aria-label="Quick navigation">
+        <Link href="/" className={`mobile-bottom-nav-item${location === "/" ? " mobile-bottom-nav-item-active" : ""}`}>
+          <Home size={19} strokeWidth={1.8} /><span>Home</span>
+        </Link>
         <Link href="/goals" className={`mobile-bottom-nav-item${location === "/goals" ? " mobile-bottom-nav-item-active" : ""}`}>
           <Flag size={19} strokeWidth={1.8} /><span>Goals</span>
         </Link>
