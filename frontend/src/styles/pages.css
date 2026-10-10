@@ -42,6 +42,23 @@
 .app-main { position: relative; isolation: isolate; min-height: 100vh; margin-left: 246px; padding: 50px clamp(28px, 6vw, 88px) 72px; background: var(--bg); }
 .app-main::before { position: absolute; z-index: -1; inset: 0; background-image: linear-gradient(rgba(223, 224, 228, .018) 1px, transparent 1px), linear-gradient(90deg, rgba(223, 224, 228, .018) 1px, transparent 1px); background-size: 72px 72px; background-position: 0 0; animation: background-drift 100s linear infinite; content: ""; pointer-events: none; }
 .page-column { width: min(100%, 696px); margin: 0 auto; }
+.settings-section { padding: 25px 0 27px; border-bottom: 1px solid var(--line); }
+.settings-section-heading { display: flex; align-items: center; gap: 11px; }
+.settings-section-icon { display: grid; width: 36px; height: 36px; flex: 0 0 36px; place-items: center; color: var(--accent); border: 1px solid var(--line-strong); border-radius: 4px; background: rgba(222, 223, 228, .035); }
+.settings-section-heading .eyebrow { margin-bottom: 3px; }
+.settings-section-heading h2 { margin: 0; color: #e4e5e9; font-family: var(--display); font-size: 21px; font-weight: 500; }
+.settings-section-description { margin: 16px 0 11px; color: var(--muted); font-size: 12px; }
+.theme-options { display: grid; gap: 7px; }
+.theme-option { display: grid; min-height: 62px; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 13px; color: var(--text); border: 1px solid var(--line); border-radius: 4px; background: rgba(222, 223, 228, .025); text-align: left; cursor: pointer; transition: border-color .18s ease, background .18s ease; }
+.theme-option:hover, .theme-option-active { border-color: color-mix(in srgb, var(--accent) 52%, transparent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.theme-swatch { display: grid; width: 28px; height: 28px; place-items: center; color: #191b20; border: 1px solid color-mix(in srgb, var(--swatch-color) 72%, transparent); border-radius: 50%; background: var(--swatch-color); }
+.theme-option-copy { display: grid; min-width: 0; gap: 4px; }
+.theme-option-copy strong { color: #e4e5e9; font-size: 12px; font-weight: 600; }
+.theme-option-copy small { color: var(--muted); font-size: 10px; line-height: 1.4; }
+.theme-current { color: var(--accent); font-size: 8px; font-weight: 700; letter-spacing: .1em; }
+.settings-info { border-bottom: 0; }
+.settings-info > p { max-width: 620px; margin: 17px 0 0; color: #b7b9c0; font-size: 13px; line-height: 1.75; }
+.settings-info > p + p { margin-top: 11px; }
 .page-heading { display: flex; align-items: end; justify-content: space-between; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
 .page-heading h1 { margin: 9px 0 0; color: #ededef; font-family: var(--display); font-size: 34px; font-weight: 500; line-height: 1; }
 .heading-period { color: #aeb0b7; }

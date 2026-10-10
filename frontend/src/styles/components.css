@@ -1,8 +1,8 @@
 .button { display: inline-flex; align-items: center; justify-content: center; gap: 11px; min-height: 48px; padding: 0 18px; border: 1px solid transparent; border-radius: 5px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
 .button:hover:not(:disabled) { transform: translateY(-1px); }
 .button:disabled { opacity: .55; cursor: wait; }
-.button-primary { color: #191b20; background: linear-gradient(115deg, #e5e6e9, #c3c6cc); box-shadow: 0 6px 24px rgba(202, 205, 213, .12); }
-.button-primary:hover:not(:disabled) { background: #f0f1f3; box-shadow: 0 8px 28px rgba(202, 205, 213, .2); }
+.button-primary { color: #191b20; background: linear-gradient(115deg, var(--accent-strong), var(--accent)); box-shadow: 0 6px 24px color-mix(in srgb, var(--accent) 18%, transparent); }
+.button-primary:hover:not(:disabled) { background: var(--accent-strong); box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 28%, transparent); }
 .button-secondary { color: var(--text); background: rgba(226, 228, 233, .045); border-color: var(--line-strong); }
 .button-secondary:hover:not(:disabled) { background: rgba(226, 228, 233, .09); border-color: rgba(219, 222, 229, .29); }
 .button-small { min-height: 36px; padding: 0 12px; font-size: 12px; }

@@ -19,6 +19,18 @@
   --display: "Cormorant Garamond", Georgia, serif;
 }
 
+:root[data-theme="field"] {
+  --accent: #a9c6ad;
+  --accent-strong: #e1f0e2;
+  --accent-dark: #708e76;
+}
+
+:root[data-theme="signal"] {
+  --accent: #e6a18d;
+  --accent-strong: #ffe4d9;
+  --accent-dark: #a96554;
+}
+
 * { box-sizing: border-box; }
 
 html { min-width: 320px; background: var(--bg); }
@@ -35,7 +47,7 @@ button { color: inherit; }
 
 :selection { color: #16181c; background: #d0d3da; }
 
-:focus-visible { outline: 2px solid #d4d7de; outline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 

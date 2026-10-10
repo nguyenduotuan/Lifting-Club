@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Bell, CalendarDays, Dumbbell, Flag, Home, LogOut, Menu, Plus, Trophy, X } from "lucide-react";
+import { Bell, CalendarDays, Dumbbell, Flag, Home, LogOut, Menu, Plus, Settings2, Trophy, X } from "lucide-react";
 import { getChallenges } from "../api/challenges";
 import { getEvents } from "../api/events";
 import { useAuth } from "../hooks/useAuth";
@@ -98,6 +98,9 @@ export default function Navigation() {
           </Link>
           <Link href="/posts" className={`nav-item nav-item-posts${location === "/posts" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
             <Plus size={19} strokeWidth={1.8} /><span>Posts</span>
+          </Link>
+          <Link href="/settings" className={`nav-item${location === "/settings" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
+            <Settings2 size={19} strokeWidth={1.8} /><span>Application Settings</span>
           </Link>
         </nav>
 

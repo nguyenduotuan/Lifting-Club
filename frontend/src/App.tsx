@@ -13,6 +13,7 @@ import NotificationsPage from "./pages/NotificationsPage";
 import PortalPage from "./pages/PortalPage";
 import ProfilePage from "./pages/ProfilePage";
 import SchedulePage from "./pages/SchedulePage";
+import SettingsPage from "./pages/SettingsPage";
 
 function LocationRedirect({ to }: { to: string }) {
   const [, setLocation] = useLocation();
@@ -52,6 +53,7 @@ function AppRoutes() {
       <Route path="/feed"><RequireAuth><PostsRedirect /></RequireAuth></Route>
       <Route path="/create"><RequireAuth><PostsRedirect /></RequireAuth></Route>
       <Route path="/posts"><RequireAuth><FeedPage /></RequireAuth></Route>
+      <Route path="/settings"><RequireAuth><SettingsPage /></RequireAuth></Route>
       <Route path="/events"><RequireAuth><EventsPage /></RequireAuth></Route>
       <Route path="/events/:id"><RequireAuth><EventDetailPage /></RequireAuth></Route>
       <Route path="/calendar"><RequireAuth><SchedulePage /></RequireAuth></Route>
