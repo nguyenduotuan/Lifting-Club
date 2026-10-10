@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronRight, Flag, Plus, Sparkles, Target, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, Flag, Plus, Sparkles, Target, Trash2 } from "lucide-react";
+import { Link, useLocation } from "wouter";
 import { addGoalUpdate, createGoal, deleteGoal, getGoals, toggleMilestone, updateGoal } from "../api/goals";
 import type { Goal, GoalCreateInput } from "../types/goal";
 
@@ -64,16 +65,21 @@ function GoalCard({ goal, onChange, onDelete }: { goal: Goal; onChange: (goal: G
   </article>;
 }
 
-export default function GoalsPage() {
+export default function GoalsPage({ createOnly = false }: { createOnly?: boolean }) {
+  const [, setLocation] = useLocation();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [form, setForm] = useState<GoalCreateInput>(emptyForm);
   const [milestoneText, setMilestoneText] = useState("");
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(createOnly);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => { getGoals().then(setGoals).catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Goals could not be loaded.")).finally(() => setLoading(false)); }, []);
+
+  useEffect(() => {
+    if (createOnly && !showForm) setLocation("/goals");
+  }, [createOnly, setLocation, showForm]);
 
   const groupedGoals = useMemo(() => goals.reduce<Record<string, Goal[]>>((groups, goal) => { (groups[goal.category] ??= []).push(goal); return groups; }, {}), [goals]);
   const activeGoals = goals.filter((goal) => goal.status === "active");
@@ -96,7 +102,7 @@ export default function GoalsPage() {
       setGoals((current) => [goal, ...current]);
       setForm(emptyForm);
       setMilestoneText("");
-      setShowForm(false);
+      setLocation("/goals");
     } catch (saveError) { setError(saveError instanceof Error ? saveError.message : "Goal could not be created."); } finally { setSaving(false); }
   }
 
@@ -107,15 +113,19 @@ export default function GoalsPage() {
   }
 
   return <section className="page-column goals-page">
-    <header className="page-heading goals-heading"><div><p className="eyebrow">THE LONG GAME</p><h1>Goals<span className="heading-period">.</span></h1><p className="goals-intro">Make room for the things you want to become.</p></div></header>
+    {createOnly ? <>
+      <Link className="back-link" href="/goals"><ArrowLeft size={16} /> Back to goals</Link>
+      <header className="page-heading goals-heading"><div><p className="eyebrow">THE LONG GAME</p><h1>New goal<span className="heading-period">.</span></h1><p className="goals-intro">Make room for the things you want to become.</p></div></header>
+    </> : <header className="page-heading goals-heading"><div><p className="eyebrow">THE LONG GAME</p><h1>Goals<span className="heading-period">.</span></h1><p className="goals-intro">Make room for the things you want to become.</p></div></header>}
+    {!createOnly && <div className="goals-overview"><div><strong>{activeGoals.length}</strong><span>IN MOTION</span></div><div><strong>{completedGoals.length}</strong><span>COMPLETED</span></div><div><strong>{goals.reduce((total, goal) => total + goal.milestones.filter((milestone) => milestone.completed).length, 0)}</strong><span>MILESTONES HIT</span></div><Sparkles size={34} /></div>}
     <div className="goals-overview"><div><strong>{activeGoals.length}</strong><span>IN MOTION</span></div><div><strong>{completedGoals.length}</strong><span>COMPLETED</span></div><div><strong>{goals.reduce((total, goal) => total + goal.milestones.filter((milestone) => milestone.completed).length, 0)}</strong><span>MILESTONES HIT</span></div><Sparkles size={34} /></div>
     {showForm && <form className="goal-create-panel" onSubmit={submitGoal}><div className="goal-create-heading"><div><p className="eyebrow">START SOMETHING</p><h2>A goal worth returning to</h2></div><button className="icon-button" type="button" onClick={() => setShowForm(false)} aria-label="Close goal form">×</button></div><div className="goal-form-grid"><div><label className="field-label" htmlFor="goal-title">Goal</label><input id="goal-title" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="Build a portfolio" required maxLength={140} /></div><div><label className="field-label" htmlFor="goal-category">Area</label><input id="goal-category" value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} placeholder="Learning" required maxLength={40} /></div></div><label className="field-label" htmlFor="goal-description">Why it matters <span>OPTIONAL</span></label><textarea id="goal-description" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Give this goal a little context..." rows={3} maxLength={2000} /><div className="goal-form-grid"><div><label className="field-label" htmlFor="goal-deadline">Deadline <span>OPTIONAL</span></label><input id="goal-deadline" type="date" value={form.deadline ?? ""} onChange={(event) => setForm({ ...form, deadline: event.target.value ? `${event.target.value}T23:59:59Z` : null })} /></div><div className="goal-progress-option"><label className="goal-check-label"><input type="checkbox" checked={form.progress_enabled} onChange={(event) => setForm({ ...form, progress_enabled: event.target.checked })} /><span>Track measurable progress</span></label>{form.progress_enabled && <div className="goal-target-row"><input type="number" min="0.01" step="any" value={form.target_value ?? ""} onChange={(event) => setForm({ ...form, target_value: Number(event.target.value) || null })} placeholder="Target" aria-label="Progress target" /><input value={form.unit ?? ""} onChange={(event) => setForm({ ...form, unit: event.target.value })} placeholder="books, sessions..." aria-label="Progress unit" maxLength={30} /></div>}</div></div><div className="goal-milestone-builder"><label className="field-label">Milestones <span>OPTIONAL</span></label><div className="goal-milestone-add"><input value={milestoneText} onChange={(event) => setMilestoneText(event.target.value)} placeholder="Add a stepping stone" maxLength={140} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addMilestone(); } }} /><button className="button button-small button-secondary" type="button" onClick={addMilestone}><Plus size={14} /> Add</button></div>{form.milestones.length > 0 && <ul>{form.milestones.map((milestone, index) => <li key={`${milestone.title}-${index}`}><span>{milestone.title}</span><button className="icon-button" type="button" onClick={() => setForm({ ...form, milestones: form.milestones.filter((_, itemIndex) => itemIndex !== index) })} aria-label={`Remove ${milestone.title}`}><Trash2 size={14} /></button></li>)}</ul>}</div>{error && <p className="form-error" role="alert">{error}</p>}<div className="form-actions"><button className="button button-primary" type="submit" disabled={saving}>Create goal <ChevronRight size={16} /></button></div></form>}
+    {!createOnly && <>
     {loading && <div className="state-message">Gathering your goals<span className="loading-dots">...</span></div>}
     {!loading && error && !showForm && <div className="state-message state-error">{error}</div>}
-    {!loading && goals.length === 0 && !showForm && <div className="goals-empty"><span className="goals-empty-mark"><Target size={23} /></span><p className="eyebrow">YOUR NEXT CHAPTER</p><h2>Give your ambition<br />somewhere to go.</h2><button className="button button-secondary" type="button" onClick={() => setShowForm(true)}>Create your first goal <ChevronRight size={16} /></button></div>}
+    {!loading && goals.length === 0 && <div className="goals-empty"><span className="goals-empty-mark"><Target size={23} /></span><p className="eyebrow">YOUR NEXT CHAPTER</p><h2>Give your ambition<br />somewhere to go.</h2><Link className="button button-secondary" href="/goals/create">Create your first goal <ChevronRight size={16} /></Link></div>}
     {!loading && goals.length > 0 && <div className="goal-sections">{Object.entries(groupedGoals).map(([category, categoryGoals]) => <section className="goal-category-section" key={category}><div className="goal-category-heading"><span>{category}</span><i /></div><div className="goal-grid">{categoryGoals.map((goal) => <GoalCard key={goal.id} goal={goal} onChange={(changed) => setGoals((current) => current.map((item) => item.id === changed.id ? changed : item))} onDelete={() => void removeGoal(goal)} />)}</div></section>)}</div>}
-    <button className="button button-primary hosted-create-fab" type="button" onClick={() => setShowForm((open) => !open)} aria-expanded={showForm}>
-      {showForm ? "Close goal form" : <><Plus size={16} /> New goal</>}
-    </button>
+    <Link className="button button-primary hosted-create-fab" href="/goals/create"><Plus size={16} /> New goal</Link>
+    </>}
   </section>;
 }

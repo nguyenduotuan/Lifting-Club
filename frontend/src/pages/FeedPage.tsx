@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Plus, RotateCw } from "lucide-react";
+import { Link } from "wouter";
 import { getPosts } from "../api/posts";
 import PostCard from "../components/PostCard";
-import CreatePostPage from "./CreatePostPage";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import type { Post } from "../types/post";
 
@@ -10,7 +10,6 @@ export default function FeedPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [composerOpen, setComposerOpen] = useState(false);
 
   async function loadPosts(options?: { background?: boolean }) {
     setError("");
@@ -62,9 +61,8 @@ export default function FeedPage() {
           </div>
         )}
         {!loading && !error && posts.length > 0 && <div className="post-list">{posts.map((post, index) => <PostCard post={post} key={post.id} featured={index === 0} />)}</div>}
-        {composerOpen && <CreatePostPage embedded onCancel={() => setComposerOpen(false)} onPosted={() => { setComposerOpen(false); void loadPosts(); }} />}
       </div>
-      <div className="feed-create-action"><button className="button button-primary" type="button" onClick={() => setComposerOpen((open) => !open)} aria-expanded={composerOpen}><Plus size={16} /> {composerOpen ? "Close post composer" : "New post"}</button></div>
+      <div className="feed-create-action"><Link className="button button-primary" href="/create"><Plus size={16} /> New post</Link></div>
     </section>
   );
 }

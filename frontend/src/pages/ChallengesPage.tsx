@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "wouter";
-import { CalendarClock, ChevronRight, Globe2, Pin, Plus, Trophy, Users } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation } from "wouter";
+import { ArrowLeft, CalendarClock, ChevronRight, Globe2, Pin, Plus, Trophy, Users } from "lucide-react";
 import { createChallenge, getChallenges, getPublicChallenges } from "../api/challenges";
 import { getUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
@@ -70,14 +70,13 @@ export function ChallengeCard({ challenge, userId, action }: { challenge: Challe
   </article>;
 }
 
-export default function ChallengesPage() {
+export default function ChallengesPage({ createOnly = false }: { createOnly?: boolean }) {
+  const [, setLocation] = useLocation();
   const { user } = useAuth();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [publicChallenges, setPublicChallenges] = useState<Challenge[]>([]);
   const [members, setMembers] = useState<User[]>([]);
   const [form, setForm] = useState<ChallengeCreateInput>(emptyForm);
-  const [showForm, setShowForm] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
   const [activeCategory, setActiveCategory] = useState<ChallengeCategory>(() => new URLSearchParams(window.location.search).get("category") === "public" ? "public" : "private");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -91,10 +90,6 @@ export default function ChallengesPage() {
     getPublicChallenges("newest", 50).then(setPublicChallenges).catch(() => setPublicChallenges([]));
     getUsers().then(setMembers).catch(() => setMembers([]));
   }, []);
-
-  useEffect(() => {
-    if (showForm) formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [showForm]);
 
   const privateChallenges = useMemo(() => challenges.filter((challenge) => challenge.host_id !== user?.id && !challenge.is_public && ["invited", "accepted"].includes(myMembership(challenge, user?.id)?.status ?? "") && !isPast(challenge.deadline)), [challenges, user]);
   const hosted = useMemo(() => challenges.filter((challenge) => challenge.host_id === user?.id && !isPast(challenge.deadline)), [challenges, user]);
@@ -111,7 +106,7 @@ export default function ChallengesPage() {
       const challenge = await createChallenge(form);
       setChallenges((current) => [challenge, ...current]);
       setForm(emptyForm);
-      setShowForm(false);
+      setLocation("/challenges?category=hosted");
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Challenge could not be created.");
     } finally { setSaving(false); }
@@ -120,12 +115,15 @@ export default function ChallengesPage() {
   const inviteable = members.filter((member) => member.id !== user?.id);
 
   return <section className="page-column challenges-page">
-    <header className="page-heading goals-heading">
+    {createOnly ? <>
+      <Link className="back-link" href="/challenges"><ArrowLeft size={16} /> Back to challenges</Link>
+      <header className="page-heading goals-heading"><div><p className="eyebrow">BETTER TOGETHER</p><h1>New challenge<span className="heading-period">.</span></h1><p className="goals-intro">Pick an arena, chase the goal, track it side by side.</p></div></header>
+    </> : <header className="page-heading goals-heading">
       <div><p className="eyebrow">BETTER TOGETHER</p><h1>Challenges<span className="heading-period">.</span></h1><p className="goals-intro">Pick an arena, chase the goal, track it side by side.</p></div>
-    </header>
+    </header>}
 
-    {activeCategory === "hosted" && showForm && <form ref={formRef} className="goal-create-panel" onSubmit={submitChallenge}>
-      <div className="goal-create-heading"><div><p className="eyebrow">HOST SOMETHING</p><h2>Set the terms of the challenge</h2></div><button className="icon-button" type="button" onClick={() => setShowForm(false)} aria-label="Close challenge form">×</button></div>
+    {createOnly && <form className="goal-create-panel" onSubmit={submitChallenge}>
+      <div className="goal-create-heading"><div><p className="eyebrow">HOST SOMETHING</p><h2>Set the terms of the challenge</h2></div></div>
       <div className="goal-form-grid">
         <div><label className="field-label" htmlFor="challenge-title">Challenge</label><input id="challenge-title" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="100K meters rowed in May" required maxLength={140} /></div>
         <div><label className="field-label" htmlFor="challenge-deadline">Deadline <span>OPTIONAL</span></label><input id="challenge-deadline" type="date" value={form.deadline?.slice(0, 10) ?? ""} onChange={(event) => setForm({ ...form, deadline: event.target.value ? `${event.target.value}T23:59:59Z` : null })} /></div>
@@ -153,18 +151,19 @@ export default function ChallengesPage() {
       <button className="button button-primary" type="submit" disabled={saving}>{saving ? "Creating..." : "Create challenge"}</button>
     </form>}
 
+    {!createOnly && <>
     {loading && <div className="state-message">Opening the arena<span className="loading-dots">...</span></div>}
-    {!loading && error && !showForm && <div className="state-message state-error">{error}</div>}
-    {!loading && challenges.length === 0 && publicChallenges.length === 0 && !showForm && <div className="goals-empty">
+    {!loading && error && <div className="state-message state-error">{error}</div>}
+    {!loading && challenges.length === 0 && publicChallenges.length === 0 && <div className="goals-empty">
       <span className="goals-empty-mark"><Trophy size={23} /></span>
       <p className="eyebrow">NO CROWDS YET</p>
       <h2>Start something worth<br />showing up for.</h2>
-      {activeCategory === "hosted" && <button className="button button-secondary" type="button" onClick={() => setShowForm(true)}>Host your first challenge <ChevronRight size={16} /></button>}
+      {activeCategory === "hosted" && <Link className="button button-secondary" href="/challenges/create">Host your first challenge <ChevronRight size={16} /></Link>}
     </div>}
 
     <nav className="collection-tabs" aria-label="Challenge categories">
-      <button className="collection-tab collection-tab-private" type="button" aria-pressed={activeCategory === "private"} onClick={() => { setActiveCategory("private"); setShowForm(false); }}>Private <span>{privateChallenges.length}</span></button>
-      <button className="collection-tab collection-tab-public" type="button" aria-pressed={activeCategory === "public"} onClick={() => { setActiveCategory("public"); setShowForm(false); }}>Public <span>{publicVisible.length}</span></button>
+      <button className="collection-tab collection-tab-private" type="button" aria-pressed={activeCategory === "private"} onClick={() => setActiveCategory("private")}>Private <span>{privateChallenges.length}</span></button>
+      <button className="collection-tab collection-tab-public" type="button" aria-pressed={activeCategory === "public"} onClick={() => setActiveCategory("public")}>Public <span>{publicVisible.length}</span></button>
       <button className="collection-tab collection-tab-hosted" type="button" aria-pressed={activeCategory === "hosted"} onClick={() => setActiveCategory("hosted")}>Hosted by you <span>{hosted.length}</span></button>
     </nav>
 
@@ -190,8 +189,7 @@ export default function ChallengesPage() {
       <div className="goal-category-heading"><span>Past challenges</span><i /></div>
       <div className="goal-grid">{past.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>
     </section>}
-    {activeCategory === "hosted" && <button className="button button-primary hosted-create-fab" type="button" onClick={() => setShowForm((open) => !open)} aria-expanded={showForm}>
-      {showForm ? "Close challenge form" : <><Plus size={16} /> New challenge</>}
-    </button>}
+    {activeCategory === "hosted" && <Link className="button button-primary hosted-create-fab" href="/challenges/create"><Plus size={16} /> New challenge</Link>}
+    </>}
   </section>;
 }
