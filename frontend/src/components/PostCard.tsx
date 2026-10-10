@@ -23,6 +23,13 @@ const reactionOptions: { emoji: PostReaction["emoji"]; label: string }[] = [
   { emoji: "😂", label: "Funny" },
 ];
 
+function formatDuration(totalSeconds: number): string {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = Math.round(totalSeconds % 60);
+  return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
 export default function PostCard({ post, onDelete, isDeleting = false, deleteDisabled = false }: PostCardProps) {
   const { user } = useAuth();
   const [comments, setComments] = useState(post.comments ?? []);
@@ -90,7 +97,7 @@ export default function PostCard({ post, onDelete, isDeleting = false, deleteDis
       <LiftList lifts={post.lifts} />
       {post.activity_name && post.distance && post.duration_seconds && <div className="activity-summary">
         <Timer size={17} />
-        <div><strong>{post.activity_name}</strong><span>{post.distance} {post.distance_unit} · {Math.floor(post.duration_seconds / 60)}:{String(post.duration_seconds % 60).padStart(2, "0")} total · {pace} / {post.distance_unit}</span></div>
+        <div><strong>{post.activity_name}</strong><span>{post.distance} {post.distance_unit} · {formatDuration(post.duration_seconds)} total · {pace} / {post.distance_unit}</span></div>
       </div>}
       <div className="post-engagement">
         <div className="reaction-list" aria-label="React to post">
