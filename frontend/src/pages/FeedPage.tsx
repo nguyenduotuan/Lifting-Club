@@ -46,6 +46,11 @@ export default function FeedPage() {
           <button className="button button-primary" type="button" onClick={() => setComposerOpen((open) => !open)}><Plus size={16} /> New post</button>
         </div>
       </header>
+      <div className="feed-edition">
+        <span className="feed-edition-mark">FIELD<br />NOTES</span>
+        <div><strong>Training, in motion.</strong><span>Recent work from your circle, all in one place.</span></div>
+        <span className="feed-edition-count">{posts.length} {posts.length === 1 ? "POST" : "POSTS"}</span>
+      </div>
 
       {composerOpen && <CreatePostPage embedded onCancel={() => setComposerOpen(false)} onPosted={() => { setComposerOpen(false); void loadPosts(); }} />}
 
@@ -59,7 +64,7 @@ export default function FeedPage() {
           <button className="button button-secondary" type="button" onClick={() => setComposerOpen(true)}>Share a post <Plus size={16} /></button>
         </div>
       )}
-      {!loading && !error && posts.length > 0 && <div className="post-list">{posts.map((post) => <PostCard post={post} key={post.id} />)}</div>}
+      {!loading && !error && posts.length > 0 && <div className="post-list">{posts.map((post, index) => <PostCard post={post} key={post.id} featured={index === 0} />)}</div>}
     </section>
   );
 }

@@ -68,7 +68,10 @@ export default function NotificationsPage() {
           <p className="eyebrow">ALL CAUGHT UP</p>
           <h2>No new invitations.</h2>
           <p className="goals-intro">New challenge and event invitations will show up here.</p>
-          <Link className="button button-secondary" href="/events">Browse events</Link>
+          <div className="notification-browse-actions">
+            <Link className="button button-secondary" href="/events">Browse events</Link>
+            <Link className="button button-secondary" href="/challenges">Browse challenges</Link>
+          </div>
         </div>
       )}
       {!loading && (invitations.length > 0 || eventInvitations.length > 0) && <div className="notification-list">

@@ -39,7 +39,10 @@ function EventCard({ event, userId, action }: { event: ClubEvent; userId: number
 
   return <article className={`goal-card event-card${eventHasEnded(event) ? " event-card-past" : ""}`}>
     <div className="goal-card-top">
-      <span className="goal-category">{category}</span>
+      <div className="challenge-card-labels">
+        <span className="goal-category">{category}</span>
+        <span className={`visibility-tag${event.is_public ? " visibility-tag-public" : ""}`}>{event.is_public ? "PUBLIC" : "PRIVATE"}</span>
+      </div>
       <span className="event-date"><CalendarClock size={13} /> {formatDate(event.starts_at)}</span>
     </div>
     <div className="event-card-title"><h2>{event.title}</h2><p>{event.description || `Hosted by ${event.host_display_name}.`}</p></div>
@@ -83,7 +86,8 @@ export default function EventsPage() {
   }, []);
 
   const invitations = useMemo(() => events.filter((event) => membership(event, user?.id)?.status === "invited"), [events, user]);
-  const attending = useMemo(() => events.filter((event) => (event.host_id === user?.id || membership(event, user?.id)?.status === "accepted") && !eventHasEnded(event)), [events, user]);
+  const hosted = useMemo(() => events.filter((event) => event.host_id === user?.id && !eventHasEnded(event)), [events, user]);
+  const joined = useMemo(() => events.filter((event) => event.host_id !== user?.id && membership(event, user?.id)?.status === "accepted" && !eventHasEnded(event)), [events, user]);
   const past = useMemo(() => events.filter((event) => (event.host_id === user?.id || membership(event, user?.id)?.status === "accepted") && eventHasEnded(event)), [events, user]);
   const discover = publicEvents.filter((event) => {
     const state = membership(event, user?.id)?.status;
@@ -184,12 +188,16 @@ export default function EventsPage() {
         <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => respondToEvent(event.id, "decline"))}>Decline</button>
       </>} />)}</div>
     </section>}
-    {!loading && attending.length > 0 && <section className="goal-category-section">
-      <div className="goal-category-heading"><span>Your upcoming events</span><i /></div>
-      <div className="goal-grid">{attending.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={event.host_id === user?.id ? <button className="icon-button event-delete" type="button" disabled={busyEventId === event.id} onClick={() => void removeEvent(event)} aria-label={`Delete ${event.title}`} title="Delete event"><Trash2 size={15} /></button> : undefined} />)}</div>
+    {!loading && hosted.length > 0 && <section className="goal-category-section">
+      <div className="goal-category-heading"><span>Hosted by you</span><i /></div>
+      <div className="goal-grid">{hosted.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={<button className="icon-button event-delete" type="button" disabled={busyEventId === event.id} onClick={() => void removeEvent(event)} aria-label={`Delete ${event.title}`} title="Delete event"><Trash2 size={15} /></button>} />)}</div>
+    </section>}
+    {!loading && joined.length > 0 && <section className="goal-category-section">
+      <div className="goal-category-heading"><span>Events you joined</span><i /></div>
+      <div className="goal-grid">{joined.map((event) => <EventCard key={event.id} event={event} userId={user?.id} />)}</div>
     </section>}
     {!loading && discover.length > 0 && <section className="goal-category-section">
-      <div className="goal-category-heading"><span>Open to everyone</span><i /></div>
+      <div className="goal-category-heading"><span>Public events</span><i /></div>
       <div className="goal-grid">{discover.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={<button className="button button-secondary" type="button" disabled={busyEventId === event.id} onClick={() => void runEventAction(event, () => joinEvent(event.id))}>Join event</button>} />)}</div>
     </section>}
     {!loading && past.length > 0 && <section className="goal-category-section">

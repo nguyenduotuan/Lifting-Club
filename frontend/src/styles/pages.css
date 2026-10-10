@@ -37,6 +37,7 @@
 .notification-copy > a { color: #e4e5e9; font-size: 14px; }
 .notification-copy > a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .notification-actions { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.notification-browse-actions { display: flex; flex-wrap: wrap; gap: 9px; }
 .events-empty { padding-top: 52px; }
 .app-main { position: relative; isolation: isolate; min-height: 100vh; margin-left: 246px; padding: 50px clamp(28px, 6vw, 88px) 72px; background: var(--bg); }
 .app-main::before { position: absolute; z-index: -1; inset: 0; background-image: linear-gradient(rgba(223, 224, 228, .018) 1px, transparent 1px), linear-gradient(90deg, rgba(223, 224, 228, .018) 1px, transparent 1px); background-size: 72px 72px; background-position: 0 0; animation: background-drift 100s linear infinite; content: ""; pointer-events: none; }
@@ -80,6 +81,15 @@
 .pull-refresh-icon { flex: 0 0 auto; }
 .pull-refresh-spinning { animation: spin .8s linear infinite; }
 .post-list { padding-top: 20px; }
+.feed-edition { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 15px 17px; margin-top: 21px; border: 1px solid rgba(189, 204, 145, .2); border-left: 2px solid #bbc98c; background: linear-gradient(110deg, rgba(104, 119, 77, .16), rgba(222, 223, 228, .018) 72%), repeating-linear-gradient(135deg, rgba(222, 223, 228, .018) 0 1px, transparent 1px 8px); }
+.feed-edition-mark { color: #c5d29f; font-size: 8px; font-weight: 700; letter-spacing: .12em; line-height: 1.4; }
+.feed-edition > div { display: grid; min-width: 0; gap: 4px; }
+.feed-edition strong { color: #e7e8e4; font-family: var(--display); font-size: 18px; font-weight: 500; }
+.feed-edition > div span { color: var(--muted); font-size: 10px; }
+.feed-edition-count { color: var(--quiet); font-size: 8px; font-weight: 700; letter-spacing: .11em; }
+.feed-heading h1 { font-size: 39px; }
+.feed-page .post-list { padding-top: 15px; }
+.posts-heading-actions .button { min-height: 37px; }
 
 .login-page { position: relative; display: grid; min-height: 100svh; overflow: hidden; place-items: center; padding: 64px 30px 80px; isolation: isolate; background: linear-gradient(135deg, #282a2f, #15171b 54%, #202227); }
 .login-page::before { position: absolute; z-index: 0; inset: 0; background-image: radial-gradient(rgba(225, 226, 230, .3) .6px, transparent .6px); background-size: 43px 43px; opacity: .1; content: ""; mask-image: linear-gradient(135deg, #000, transparent 72%); pointer-events: none; }
@@ -226,6 +236,12 @@
 .goal-grid { display: grid; gap: 13px; }
 .event-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .event-card { animation: rise-in .35s both; }
+.challenge-card, .event-card { border-color: rgba(184, 205, 193, .23); background: linear-gradient(135deg, rgba(114, 145, 128, .17), rgba(31, 35, 38, .58) 72%); backdrop-filter: blur(11px); box-shadow: 0 15px 34px rgba(0, 0, 0, .16), inset 0 1px rgba(226, 236, 226, .045); }
+.challenge-card:hover, .event-card:hover { border-color: rgba(196, 218, 202, .36); background: linear-gradient(135deg, rgba(114, 145, 128, .23), rgba(31, 35, 38, .68) 72%); }
+.challenge-card .goal-meta, .event-card .goal-meta { flex-wrap: wrap; }
+.challenge-card-labels { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.visibility-tag { padding: 4px 6px; border: 1px solid rgba(224, 210, 166, .2); color: rgba(226, 214, 183, .8); font-size: 8px; font-weight: 700; letter-spacing: .09em; }
+.visibility-tag-public { border-color: rgba(177, 211, 192, .26); color: rgba(192, 222, 206, .9); }
 .event-card-past { opacity: .72; }
 .event-date { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: 11px; }
 .event-card-title { margin-top: 12px; }

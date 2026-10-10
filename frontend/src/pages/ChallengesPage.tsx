@@ -43,7 +43,10 @@ export function ChallengeCard({ challenge, userId, action }: { challenge: Challe
 
   return <article className={`goal-card challenge-card${isPast(challenge.deadline) ? " challenge-card-past" : ""}`}>
     <div className="goal-card-top">
-      <span className="goal-category">{challenge.host_id === userId ? "HOSTING" : membership?.status === "invited" ? "INVITED" : membership?.status === "accepted" ? "JOINED" : challenge.is_public ? "PUBLIC" : "JOINED"}</span>
+      <div className="challenge-card-labels">
+        <span className="goal-category">{challenge.host_id === userId ? "HOSTING" : membership?.status === "invited" ? "INVITED" : "JOINED"}</span>
+        <span className={`visibility-tag${challenge.is_public ? " visibility-tag-public" : ""}`}>{challenge.is_public ? "PUBLIC" : "PRIVATE"}</span>
+      </div>
       <span className="challenge-deadline"><CalendarClock size={13} /> {formatDeadline(challenge.deadline)}</span>
     </div>
     <Link href={`/challenges/${challenge.id}`} className="goal-title-row challenge-title-link">
@@ -84,8 +87,9 @@ export default function ChallengesPage() {
   }, []);
 
   const invites = useMemo(() => challenges.filter((challenge) => myMembership(challenge, user?.id)?.status === "invited"), [challenges, user]);
-  const active = useMemo(() => challenges.filter((challenge) => myMembership(challenge, user?.id)?.status !== "invited" && !isPast(challenge.deadline)), [challenges, user]);
-  const past = useMemo(() => challenges.filter((challenge) => myMembership(challenge, user?.id)?.status !== "invited" && isPast(challenge.deadline)), [challenges, user]);
+  const hosted = useMemo(() => challenges.filter((challenge) => challenge.host_id === user?.id && !isPast(challenge.deadline)), [challenges, user]);
+  const joined = useMemo(() => challenges.filter((challenge) => challenge.host_id !== user?.id && myMembership(challenge, user?.id)?.status === "accepted" && !isPast(challenge.deadline)), [challenges, user]);
+  const past = useMemo(() => challenges.filter((challenge) => (challenge.host_id === user?.id || myMembership(challenge, user?.id)?.status === "accepted") && isPast(challenge.deadline)), [challenges, user]);
 
   async function respond(challenge: Challenge, action: "accept" | "decline") {
     setError("");
@@ -178,13 +182,21 @@ export default function ChallengesPage() {
       ))}</div>
     </section>}
 
-    {!loading && active.length > 0 && <section className="goal-category-section">
-      <div className="goal-category-heading"><span>In progress</span><i /></div>
-      <div className="goal-grid">{active.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>
+    {!loading && hosted.length > 0 && <section className="goal-category-section">
+      <div className="goal-category-heading"><span>Hosted by you</span><i /></div>
+      <div className="goal-grid">{hosted.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>
     </section>}
 
-    {!loading && publicChallenges.length > 0 && <section className="goal-category-section">
-      <div className="goal-category-heading"><span>Open to everyone</span><i /></div>
+    {!loading && joined.length > 0 && <section className="goal-category-section">
+      <div className="goal-category-heading"><span>Challenges you joined</span><i /></div>
+      <div className="goal-grid">{joined.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>
+    </section>}
+
+    {!loading && publicChallenges.some((challenge) => {
+      const membership = myMembership(challenge, user?.id);
+      return !membership || membership.status === "declined";
+    }) && <section className="goal-category-section">
+      <div className="goal-category-heading"><span>Public challenges</span><i /></div>
       <div className="goal-grid">{publicChallenges.filter((challenge) => {
         const membership = myMembership(challenge, user?.id);
         return !membership || membership.status === "declined";
@@ -194,7 +206,7 @@ export default function ChallengesPage() {
     </section>}
 
     {!loading && past.length > 0 && <section className="goal-category-section">
-      <div className="goal-category-heading"><span>Wrapped up</span><i /></div>
+      <div className="goal-category-heading"><span>Past challenges</span><i /></div>
       <div className="goal-grid">{past.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>
     </section>}
   </section>;

@@ -49,6 +49,8 @@
 
 .post-card { padding: 22px; border: 1px solid var(--line); border-radius: 7px; background: linear-gradient(145deg, rgba(39, 41, 47, .98), rgba(30, 32, 37, .99)); box-shadow: 0 16px 38px rgba(0, 0, 0, .2); animation: rise-in .42s both; }
 .post-card + .post-card { margin-top: 17px; }
+.post-card-featured { border-color: rgba(191, 207, 148, .3); background: linear-gradient(125deg, rgba(81, 91, 67, .34), rgba(31, 34, 38, .96) 62%); box-shadow: 0 18px 42px rgba(0, 0, 0, .24), inset 3px 0 rgba(190, 211, 130, .74); }
+.post-featured-kicker { margin: 18px 0 -5px; color: #c6d79b; font-size: 9px; font-weight: 700; letter-spacing: .14em; }
 .post-header { display: flex; align-items: center; min-width: 0; gap: 11px; }
 .post-author { display: grid; min-width: 0; gap: 2px; }
 .post-author-name { overflow: hidden; color: #ededf0; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }

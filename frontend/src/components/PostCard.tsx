@@ -13,6 +13,7 @@ interface PostCardProps {
   onDelete?: () => void;
   isDeleting?: boolean;
   deleteDisabled?: boolean;
+  featured?: boolean;
 }
 
 const reactionOptions: { emoji: PostReaction["emoji"]; label: string }[] = [
@@ -30,7 +31,7 @@ function formatDuration(totalSeconds: number): string {
   return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-export default function PostCard({ post, onDelete, isDeleting = false, deleteDisabled = false }: PostCardProps) {
+export default function PostCard({ post, onDelete, isDeleting = false, deleteDisabled = false, featured = false }: PostCardProps) {
   const { user } = useAuth();
   const [comments, setComments] = useState(post.comments ?? []);
   const [reactions, setReactions] = useState(post.reactions ?? []);
@@ -80,7 +81,7 @@ export default function PostCard({ post, onDelete, isDeleting = false, deleteDis
   }
 
   return (
-    <article className="post-card">
+    <article className={`post-card${featured ? " post-card-featured" : ""}`}>
       <header className="post-header">
         <Avatar username={post.user.username} displayName={post.user.display_name} image={post.user.profile_image} linked />
         <div className="post-author">
@@ -92,6 +93,7 @@ export default function PostCard({ post, onDelete, isDeleting = false, deleteDis
           <Trash2 size={16} />
         </button>}
       </header>
+      {featured && <p className="post-featured-kicker">LATEST FROM THE CLUB</p>}
       {post.caption && <p className="post-caption">{post.caption}</p>}
       <MediaDisplay items={post.media} />
       <LiftList lifts={post.lifts} />
