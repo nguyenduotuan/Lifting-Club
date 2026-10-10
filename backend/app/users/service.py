@@ -1,6 +1,9 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
+from app.config.settings import settings
+from app.media.service import store_profile_image
+from app.media.storage import delete_file
 from app.users.repository import UserRepository
 from app.users.schemas import UserProfile, UserRead
 
@@ -17,3 +20,12 @@ def update_display_name(db: Session, user, display_name: str):
     if not normalized_name:
         raise HTTPException(status_code=422, detail="Display name cannot be empty.")
     return UserRepository.update_display_name(db, user, normalized_name)
+
+
+async def update_profile_image(db: Session, user, upload: UploadFile):
+    stored_image = await store_profile_image(upload)
+    previous_image = user.profile_image
+    updated_user = UserRepository.update_profile_image(db, user, stored_image.file_path)
+    if previous_image:
+        delete_file(settings.upload_dir, previous_image)
+    return updated_user

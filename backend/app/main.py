@@ -11,7 +11,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.auth.router import router as auth_router
 from app.config.settings import settings
 from app.database.database import Base, engine
-from app.database.migrations import migrate_lift_weights, migrate_post_activity
+from app.database.migrations import migrate_lift_weights, migrate_post_activity, migrate_user_profile_image
 from app.database import models
 from app.posts.router import router as posts_router
 from app.goals.router import router as goals_router
@@ -27,6 +27,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     Base.metadata.create_all(bind=engine)
     migrate_lift_weights(engine)
     migrate_post_activity(engine)
+    migrate_user_profile_image(engine)
     yield
 
 

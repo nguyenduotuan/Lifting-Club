@@ -25,6 +25,13 @@ class UserRepository:
         return user
 
     @staticmethod
+    def update_profile_image(db: Session, user: User, profile_image: str) -> User:
+        user.profile_image = profile_image
+        db.commit()
+        db.refresh(user)
+        return user
+
+    @staticmethod
     def create(db: Session, username: str, password_hash: str, display_name: str) -> User:
         user = User(username=username, password_hash=password_hash, display_name=display_name)
         db.add(user)

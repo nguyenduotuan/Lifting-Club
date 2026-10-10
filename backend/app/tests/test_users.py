@@ -26,3 +26,17 @@ def test_display_name_cannot_be_empty(signed_in_client):
     response = signed_in_client.patch("/api/users/me", json={"display_name": "   "})
 
     assert response.status_code == 422
+
+
+def test_signed_in_user_can_update_profile_image(signed_in_client):
+    response = signed_in_client.patch(
+        "/api/users/me/profile-image",
+        files={"image": ("profile.png", b"fake image", "image/png")},
+    )
+
+    assert response.status_code == 200
+    profile_image = response.json()["profile_image"]
+    assert profile_image.startswith("/uploads/")
+    from app.config.settings import settings
+
+    assert (settings.upload_dir / profile_image.rsplit("/", 1)[-1]).read_bytes() == b"fake image"

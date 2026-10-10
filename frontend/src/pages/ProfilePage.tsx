@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { CalendarDays, Check, Dumbbell, Pencil, X } from "lucide-react";
+import { CalendarDays, Camera, Check, Dumbbell, Pencil, X } from "lucide-react";
 import { useRoute } from "wouter";
 import { deletePost } from "../api/posts";
-import { getUser, getUserPosts, updateDisplayName } from "../api/users";
+import { getUser, getUserPosts, updateDisplayName, updateProfileImage } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 import Avatar from "../components/Avatar";
 import PostCard from "../components/PostCard";
@@ -23,6 +23,8 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState("");
   const [nameError, setNameError] = useState("");
   const [savingName, setSavingName] = useState(false);
+  const [savingImage, setSavingImage] = useState(false);
+  const [imageError, setImageError] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -91,10 +93,31 @@ export default function ProfilePage() {
     }
   }
 
+  async function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const image = event.target.files?.[0];
+    event.target.value = "";
+    if (!image) return;
+    setSavingImage(true);
+    setImageError("");
+    try {
+      const updatedUser = await updateProfileImage(image);
+      updateUser(updatedUser);
+      setProfile((current) => current ? { ...current, profile_image: updatedUser.profile_image } : current);
+    } catch (saveError) {
+      setImageError(saveError instanceof Error ? saveError.message : "Profile picture could not be updated.");
+    } finally {
+      setSavingImage(false);
+    }
+  }
+
   return (
     <section className="page-column profile-page">
       <header className="profile-header">
-        {profile && <Avatar username={profile.username} displayName={profile.display_name} image={profile.profile_image} size="large" />}
+        {profile && (isOwnProfile ? <label className="profile-avatar-upload" aria-label="Change profile picture" title="Change profile picture">
+          <Avatar username={profile.username} displayName={profile.display_name} image={profile.profile_image} size="large" />
+          <span><Camera size={16} /></span>
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageChange} disabled={savingImage} />
+        </label> : <Avatar username={profile.username} displayName={profile.display_name} image={profile.profile_image} size="large" />)}
         <div className="profile-identity">
           {profile ? (
             <>
@@ -113,6 +136,7 @@ export default function ProfilePage() {
               )}
               <span className="profile-handle">@{profile.username}</span>
               {nameError && <p className="profile-name-error" role="alert">{nameError}</p>}
+              {imageError && <p className="profile-name-error" role="alert">{imageError}</p>}
             </>
           ) : <p className="eyebrow">ATHLETE PROFILE</p>}
           {joinedDate && <span className="profile-joined"><CalendarDays size={14} /> Member since {joinedDate}</span>}

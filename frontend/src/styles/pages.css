@@ -124,6 +124,10 @@
 .share-arrow { transform: rotate(135deg); }
 
 .profile-header { display: flex; align-items: center; gap: 22px; padding: 15px 0 24px; border-bottom: 1px solid var(--line); }
+.profile-avatar-upload { position: relative; display: block; width: 92px; height: 92px; flex: 0 0 92px; cursor: pointer; }
+.profile-avatar-upload > span { position: absolute; right: 2px; bottom: 2px; display: grid; width: 28px; height: 28px; place-items: center; color: #17191d; border: 2px solid #17191d; border-radius: 50%; background: #d8d9dd; }
+.profile-avatar-upload input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+.profile-avatar-upload:hover > span { background: #f0f1f3; }
 .profile-identity { min-width: 0; }
 .profile-identity h1 { overflow-wrap: anywhere; margin: 8px 0 3px; color: #ededef; font-family: var(--display); font-size: 27px; font-weight: 500; }
 .profile-name-row, .profile-name-form { display: flex; align-items: center; gap: 7px; }
@@ -235,6 +239,7 @@
   .lift-field-row input, .lift-field-row select { height: 38px; padding-inline: 6px; font-size: 11px; }
   .remove-lift { width: 30px; height: 30px; flex-basis: 30px; }
   .profile-header { gap: 15px; }
+  .profile-avatar-upload { width: 76px; height: 76px; flex-basis: 76px; }
   .profile-identity h1 { font-size: 23px; }
   .login-page { padding: 42px 18px 68px; }
   .login-angel-backdrop { height: 49%; }

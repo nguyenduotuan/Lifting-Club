@@ -21,3 +21,12 @@ export function updateDisplayName(displayName: string): Promise<User> {
     body: JSON.stringify({ display_name: displayName }),
   });
 }
+
+export function updateProfileImage(image: File): Promise<User> {
+  const formData = new FormData();
+  formData.append("image", image);
+  return request<User>("/users/me/profile-image", {
+    method: "PATCH",
+    body: formData,
+  });
+}

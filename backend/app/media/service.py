@@ -35,3 +35,16 @@ async def store_upload(upload: UploadFile) -> StoredMedia:
     media_type, extension = media_details
     file_path = save_file(settings.upload_dir, content, extension)
     return StoredMedia(file_path=file_path, media_type=media_type)
+
+
+async def store_profile_image(upload: UploadFile) -> StoredMedia:
+    media_details = SUPPORTED_TYPES.get((upload.content_type or "").lower())
+    if media_details is None or media_details[0] != "image":
+        raise HTTPException(status_code=422, detail="Profile pictures must be JPEG, PNG, WebP, or GIF images.")
+
+    content = await upload.read(settings.max_upload_size_bytes + 1)
+    if len(content) > settings.max_upload_size_bytes:
+        raise HTTPException(status_code=413, detail="The profile picture must be 25 MB or smaller.")
+
+    _, extension = media_details
+    return StoredMedia(file_path=save_file(settings.upload_dir, content, extension), media_type="image")

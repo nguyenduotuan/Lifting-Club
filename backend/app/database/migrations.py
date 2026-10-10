@@ -64,3 +64,19 @@ def migrate_post_activity(db_engine: Engine = engine) -> None:
         for name, column_type in activity_columns.items():
             if name not in columns:
                 connection.exec_driver_sql(f"ALTER TABLE posts ADD COLUMN {name} {column_type}")
+
+
+def migrate_user_profile_image(db_engine: Engine = engine) -> None:
+    if db_engine.dialect.name not in {"sqlite", "postgresql"}:
+        return
+
+    with db_engine.begin() as connection:
+        if db_engine.dialect.name == "postgresql":
+            connection.exec_driver_sql(
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_image VARCHAR(255)"
+            )
+            return
+
+        columns = {column[1] for column in connection.exec_driver_sql("PRAGMA table_info(users)").fetchall()}
+        if "profile_image" not in columns:
+            connection.exec_driver_sql("ALTER TABLE users ADD COLUMN profile_image VARCHAR(255)")
