@@ -15,7 +15,7 @@
 .nav-account-copy strong { overflow: hidden; color: #dedfe3; font-size: 11px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .nav-account-copy span { color: #898b92; font-size: 10px; }
 .nav-logout { width: 32px; height: 32px; flex-basis: 32px; }
-.mobile-topbar, .mobile-menu-backdrop, .mobile-nav-close { display: none; }
+.mobile-topbar, .mobile-menu-backdrop, .mobile-nav-close, .mobile-bottom-nav { display: none; }
 .member-search-section { display: grid; min-height: 0; gap: 8px; margin-top: 27px; }
 .member-search-field { display: flex; height: 40px; align-items: center; gap: 9px; padding: 0 11px; color: #a6a8ae; border: 1px solid var(--line); border-radius: 4px; background: rgba(12, 13, 16, .35); }
 .member-search-field:focus-within { border-color: rgba(197, 200, 207, .4); }
@@ -211,7 +211,12 @@
   .nav-item { min-width: 0; min-height: 46px; flex-direction: row; justify-content: flex-start; gap: 14px; padding: 0 13px; font-size: 13px; }
   .nav-item svg { width: 19px; height: 19px; }
   .nav-account { display: flex; margin-top: auto; }
-  .app-main { min-height: 100vh; margin-left: 0; padding: 90px 22px 38px; }
+  .app-main { min-height: 100vh; margin-left: 0; padding: 90px 22px 104px; }
+  .mobile-bottom-nav { position: fixed; z-index: 7; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(3, 1fr); height: 70px; padding: 7px 18px max(7px, env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: rgba(20, 22, 26, .96); box-shadow: 0 -12px 30px rgba(0, 0, 0, .2); backdrop-filter: blur(18px); }
+  .mobile-bottom-nav-item { display: flex; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 5px; color: #85878e; border-radius: 5px; font-size: 10px; font-weight: 600; }
+  .mobile-bottom-nav-item:hover { color: #dedfe3; background: rgba(222, 223, 228, .05); }
+  .mobile-bottom-nav-item-active { color: #e5e6e9; }
+  .mobile-bottom-nav-item-active svg { color: #c9cbd1; }
   .login-layout { width: min(100%, 440px); grid-template-columns: 1fr; gap: 31px; }
   .login-angel-backdrop { width: 100%; height: 56%; mask-image: linear-gradient(180deg, #000 10%, rgba(0, 0, 0, .58) 61%, transparent 100%); }
   .login-angel-backdrop img { object-position: 50% 37%; }
@@ -229,7 +234,7 @@
 }
 
 @media (max-width: 480px) {
-  .app-main { padding: 84px 15px 33px; }
+  .app-main { padding: 84px 15px 104px; }
   .page-heading h1 { font-size: 30px; }
   .feed-metric + .feed-metric { padding-left: 12px; }
   .feed-metric span { font-size: 7px; }

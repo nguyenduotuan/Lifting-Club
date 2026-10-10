@@ -119,6 +119,17 @@ export default function Navigation() {
           </button>
         </div>
       </aside>
+      <nav className="mobile-bottom-nav" aria-label="Quick navigation">
+        <Link href="/goals" className={`mobile-bottom-nav-item${location === "/goals" ? " mobile-bottom-nav-item-active" : ""}`}>
+          <Flag size={19} strokeWidth={1.8} /><span>Goals</span>
+        </Link>
+        <Link href="/create" className={`mobile-bottom-nav-item${location === "/create" ? " mobile-bottom-nav-item-active" : ""}`}>
+          <Plus size={21} strokeWidth={1.8} /><span>Create</span>
+        </Link>
+        <Link href={`/profile/${user.username}`} className={`mobile-bottom-nav-item${location.startsWith("/profile") ? " mobile-bottom-nav-item-active" : ""}`}>
+          <CircleUserRound size={19} strokeWidth={1.8} /><span>Profile</span>
+        </Link>
+      </nav>
     </>
   );
 }
