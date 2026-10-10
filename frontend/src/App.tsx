@@ -4,6 +4,7 @@ import Navigation from "./components/Navigation";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import CreatePostPage from "./pages/CreatePostPage";
 import FeedPage from "./pages/FeedPage";
+import GoalsPage from "./pages/GoalsPage";
 import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 
@@ -39,6 +40,7 @@ function AppRoutes() {
     <Switch>
       <Route path="/login"><LoginRoute /></Route>
       <Route path="/create"><RequireAuth><CreatePostPage /></RequireAuth></Route>
+      <Route path="/goals"><RequireAuth><GoalsPage /></RequireAuth></Route>
       <Route path="/profile"><RequireAuth><ProfileRedirect /></RequireAuth></Route>
       <Route path="/profile/:username"><RequireAuth><ProfilePage /></RequireAuth></Route>
       <Route path="/"><RequireAuth><FeedPage /></RequireAuth></Route>

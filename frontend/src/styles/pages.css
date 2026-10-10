@@ -141,6 +141,43 @@
 .profile-empty { display: flex; align-items: center; gap: 11px; min-height: 126px; color: #8c8d94; font-size: 12px; }
 .profile-empty svg { color: #c0c1c7; }
 
+.goals-heading { align-items: center; }
+.goals-heading .button { min-height: 40px; }
+.goals-intro { margin: 13px 0 0; color: var(--muted); font-size: 12px; }
+.goals-overview { position: relative; display: flex; gap: 34px; padding: 20px 0 22px; border-bottom: 1px solid var(--line); }
+.goals-overview > div { display: grid; gap: 5px; }
+.goals-overview strong { color: #e2e3e7; font-family: var(--display); font-size: 25px; font-weight: 500; line-height: 1; }
+.goals-overview span { color: var(--quiet); font-size: 8px; font-weight: 600; letter-spacing: .13em; }
+.goals-overview > svg { position: absolute; right: 8px; bottom: 17px; color: rgba(185, 194, 187, .25); transform: rotate(12deg); }
+.goal-create-panel { padding: 25px 26px 23px; margin-top: 22px; border: 1px solid rgba(184, 197, 188, .24); border-radius: 7px; background: linear-gradient(145deg, rgba(67, 77, 70, .42), rgba(31, 35, 38, .88)); box-shadow: 0 20px 50px rgba(0, 0, 0, .18); animation: rise-in .35s both; }
+.goal-create-heading { display: flex; align-items: flex-start; justify-content: space-between; }
+.goal-create-heading h2 { margin: 7px 0 22px; color: #e8e9e8; font-family: var(--display); font-size: 23px; font-weight: 500; }
+.goal-form-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); gap: 13px; margin-top: 16px; }
+.goal-create-panel input, .goal-create-panel textarea, .goal-create-panel select { width: 100%; color: #e5e6e9; border: 1px solid var(--line-strong); border-radius: 4px; outline: none; background: rgba(12, 13, 16, .23); }
+.goal-create-panel input, .goal-create-panel select { height: 41px; padding: 0 11px; }
+.goal-create-panel textarea { display: block; padding: 11px; resize: vertical; font-size: 12px; line-height: 1.55; }
+.goal-create-panel input:focus, .goal-create-panel textarea:focus, .goal-create-panel select:focus { border-color: rgba(184, 203, 190, .6); background: rgba(12, 13, 16, .38); }
+.goal-progress-option { align-self: end; }
+.goal-check-label { display: flex; min-height: 41px; align-items: center; gap: 9px; color: #c8cec9; font-size: 11px; }
+.goal-check-label input { width: 15px; height: 15px; accent-color: #a8baa9; }
+.goal-target-row { display: flex; gap: 7px; margin-top: 8px; }
+.goal-target-row input:first-child { flex: 0 1 110px; }
+.goal-target-row input:last-child { flex: 1; }
+.goal-milestone-builder { margin-top: 18px; }
+.goal-milestone-add { display: flex; gap: 7px; }
+.goal-milestone-add input { flex: 1; }
+.goal-milestone-builder ul { display: grid; gap: 5px; padding: 0; margin: 9px 0 0; list-style: none; }
+.goal-milestone-builder li { display: flex; align-items: center; justify-content: space-between; min-height: 34px; padding-left: 10px; color: #c3c8c4; border: 1px solid var(--line); border-radius: 4px; font-size: 11px; }
+.goal-milestone-builder li .icon-button { width: 29px; height: 29px; flex-basis: 29px; }
+.goals-empty { display: grid; justify-items: start; padding: 65px 0 45px; animation: rise-in .55s both; }
+.goals-empty-mark { display: grid; width: 57px; height: 57px; place-items: center; margin-bottom: 27px; color: #abb9ae; border: 1px solid rgba(172, 190, 177, .32); border-radius: 50%; background: rgba(159, 181, 164, .06); }
+.goals-empty h2 { margin: 13px 0 24px; color: #e2e3e7; font-family: var(--display); font-size: 29px; font-weight: 500; line-height: 1.25; }
+.goal-sections { padding-top: 25px; }
+.goal-category-section + .goal-category-section { margin-top: 30px; }
+.goal-category-heading { display: flex; align-items: center; gap: 11px; margin-bottom: 12px; color: #aab6ad; font-size: 9px; font-weight: 600; letter-spacing: .15em; }
+.goal-category-heading i { display: block; width: 22px; height: 1px; background: rgba(170, 190, 175, .5); }
+.goal-grid { display: grid; gap: 13px; }
+
 @keyframes login-arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes orbit-drift { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-13px, 11px, 0); } }
 @keyframes background-drift { to { background-position: 72px 72px, 72px 72px; } }

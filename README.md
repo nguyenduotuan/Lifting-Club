@@ -6,7 +6,8 @@ A private gym log for a small group of friends. The React frontend talks to a Fa
 
 - Members register or log in with a username and password.
 - FYP shows the newest posts first; profiles show each member's posts.
-- Posts contain a caption, one or more structured lifts, and optional photos or videos.
+- Posts can be regular updates, structured lift sessions, or distance activities with an automatically calculated pace, plus optional photos or videos.
+- Members can privately track personal goals with categories, deadlines, milestones, progress bars, and updates.
 - Media is stored on disk; SQLite stores its paths and the post/lift data.
 - The React frontend uses the REST API only. The API can also serve a future mobile client.
 
@@ -212,8 +213,14 @@ All API routes are under `/api`. Registration, login, and logout manage a signed
 | `GET` | `/users/{username}/posts` | Get a member's posts |
 | `GET` | `/posts` | Get the newest-first feed |
 | `GET` | `/posts/{post_id}` | Get one post |
-| `POST` | `/posts` | Create a post with lifts and optional media |
+| `POST` | `/posts` | Create a regular, lift, or distance-activity post with optional media |
 | `DELETE` | `/posts/{post_id}` | Delete your own post |
+| `GET` | `/goals` | Get your personal goals |
+| `POST` | `/goals` | Create a personal goal |
+| `PATCH` | `/goals/{goal_id}` | Update goal progress or status |
+| `PATCH` | `/goals/{goal_id}/milestones/{milestone_id}` | Toggle a milestone |
+| `POST` | `/goals/{goal_id}/updates` | Add a progress update |
+| `DELETE` | `/goals/{goal_id}` | Delete your goal |
 
 ## Project structure
 
@@ -235,6 +242,7 @@ gym-social/
 │   │   ├── lifts/               # Lift validation and uint32 bounds
 │   │   ├── media/               # Upload validation and local storage
 │   │   ├── posts/               # Post routes, services, repositories, schemas
+│   │   ├── goals/               # Personal goals, milestones, progress, updates
 │   │   ├── users/               # Profile routes and persistence
 │   │   └── tests/               # API and migration tests
 └── frontend/

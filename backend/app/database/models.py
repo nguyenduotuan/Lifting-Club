@@ -23,6 +23,7 @@ class User(Base):
     posts: Mapped[list["Post"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     comments: Mapped[list["Comment"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     reactions: Mapped[list["PostReaction"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    goals: Mapped[list["Goal"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
 class Post(Base):
@@ -97,3 +98,52 @@ class PostReaction(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     post: Mapped[Post] = relationship(back_populates="reactions")
     user: Mapped[User] = relationship(back_populates="reactions")
+
+
+class Goal(Base):
+    __tablename__ = "goals"
+    __table_args__ = (
+        CheckConstraint("target_value IS NULL OR target_value > 0", name="ck_goals_target_positive"),
+        CheckConstraint("current_value >= 0", name="ck_goals_current_nonnegative"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(140))
+    description: Mapped[str] = mapped_column(Text, default="")
+    category: Mapped[str] = mapped_column(String(40), default="Personal")
+    deadline: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    progress_enabled: Mapped[bool] = mapped_column(default=False)
+    current_value: Mapped[float] = mapped_column(Float, default=0)
+    target_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    unit: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="active")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    user: Mapped[User] = relationship(back_populates="goals")
+    milestones: Mapped[list["GoalMilestone"]] = relationship(
+        back_populates="goal", cascade="all, delete-orphan", order_by="(GoalMilestone.position, GoalMilestone.id)"
+    )
+    updates: Mapped[list["GoalUpdate"]] = relationship(
+        back_populates="goal", cascade="all, delete-orphan", order_by="(GoalUpdate.created_at, GoalUpdate.id)"
+    )
+
+
+class GoalMilestone(Base):
+    __tablename__ = "goal_milestones"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    goal_id: Mapped[int] = mapped_column(ForeignKey("goals.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(140))
+    completed: Mapped[bool] = mapped_column(default=False)
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    goal: Mapped[Goal] = relationship(back_populates="milestones")
+
+
+class GoalUpdate(Base):
+    __tablename__ = "goal_updates"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    goal_id: Mapped[int] = mapped_column(ForeignKey("goals.id", ondelete="CASCADE"), index=True)
+    body: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    goal: Mapped[Goal] = relationship(back_populates="updates")

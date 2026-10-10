@@ -14,6 +14,7 @@ from app.database.database import Base, engine
 from app.database.migrations import migrate_lift_weights, migrate_post_activity
 from app.database import models
 from app.posts.router import router as posts_router
+from app.goals.router import router as goals_router
 from app.users.router import router as users_router
 
 
@@ -47,6 +48,7 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
 app.include_router(posts_router, prefix="/api")
+app.include_router(goals_router, prefix="/api")
 app.get("/api/health", tags=["health"])(lambda: {"status": "ok"})
 app.mount("/uploads", StaticFiles(directory=settings.upload_dir, check_dir=False), name="uploads")
 
