@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { CalendarDays, Camera, Check, Dumbbell, Pencil, X } from "lucide-react";
 import { useRoute } from "wouter";
 import { deletePost } from "../api/posts";
+import { getEvents } from "../api/events";
 import { getUser, getUserPosts, updateDisplayName, updateProfileImage } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 import Avatar from "../components/Avatar";
+import EventCalendar from "../components/EventCalendar";
 import PostCard from "../components/PostCard";
+import type { ClubEvent } from "../types/event";
 import type { Post } from "../types/post";
 import type { UserProfile } from "../types/user";
 
@@ -15,6 +18,10 @@ export default function ProfilePage() {
   const { user: signedInUser, updateUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<ClubEvent[]>([]);
+  const [activeTab, setActiveTab] = useState<"posts" | "calendar">("posts");
+  const [calendarLoading, setCalendarLoading] = useState(false);
+  const [calendarError, setCalendarError] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deleteError, setDeleteError] = useState("");
@@ -40,6 +47,24 @@ export default function ProfilePage() {
       .finally(() => active && setLoading(false));
     return () => { active = false; };
   }, [username]);
+
+  useEffect(() => { setActiveTab("posts"); }, [username]);
+
+  useEffect(() => {
+    if (username !== signedInUser?.username) {
+      setCalendarEvents([]);
+      setCalendarLoading(false);
+      return;
+    }
+    let active = true;
+    setCalendarLoading(true);
+    setCalendarError("");
+    getEvents()
+      .then((nextEvents) => active && setCalendarEvents(nextEvents))
+      .catch((loadError) => active && setCalendarError(loadError instanceof Error ? loadError.message : "Calendar could not be loaded."))
+      .finally(() => active && setCalendarLoading(false));
+    return () => { active = false; };
+  }, [username, signedInUser?.username]);
 
   const joinedDate = profile?.created_at
     ? new Date(profile.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" })
@@ -143,12 +168,18 @@ export default function ProfilePage() {
         </div>
       </header>
       {profile && <div className="profile-stats"><div><strong>{profile.post_count}</strong><span>POSTS</span></div><div><strong>TRAINING</strong><span>IN GOOD COMPANY</span></div></div>}
-      <div className="profile-post-heading"><span className="eyebrow">SESSION LOG</span><span>{profile?.username === signedInUser?.username ? "YOUR POSTS" : "POSTS"}</span></div>
+      {profile && <div className="profile-tabs" role="tablist" aria-label="Profile sections">
+        <button className={`profile-tab${activeTab === "posts" ? " profile-tab-active" : ""}`} type="button" role="tab" aria-selected={activeTab === "posts"} onClick={() => setActiveTab("posts")}>Posts <span>{profile.post_count}</span></button>
+        {isOwnProfile && <button className={`profile-tab${activeTab === "calendar" ? " profile-tab-active" : ""}`} type="button" role="tab" aria-selected={activeTab === "calendar"} onClick={() => setActiveTab("calendar")}>Calendar <span>{calendarEvents.length}</span></button>}
+      </div>}
       {loading && <div className="state-message">Loading profile<span className="loading-dots">...</span></div>}
       {!loading && error && <div className="state-message state-error" role="alert">{error}</div>}
-      {!loading && deleteError && <div className="state-message state-error" role="alert">{deleteError}</div>}
-      {!loading && !error && posts.length === 0 && <div className="profile-empty"><Dumbbell size={20} /><span>No sessions posted yet.</span></div>}
-      {!loading && !error && posts.length > 0 && <div className="post-list">{posts.map((post) => <PostCard post={post} key={post.id} onDelete={isOwnProfile ? () => void handleDeletePost(post.id) : undefined} isDeleting={deletingPostId === post.id} deleteDisabled={deletingPostId !== null} />)}</div>}
+      {!loading && !error && activeTab === "posts" && deleteError && <div className="state-message state-error" role="alert">{deleteError}</div>}
+      {!loading && !error && activeTab === "posts" && posts.length === 0 && <div className="profile-empty"><Dumbbell size={20} /><span>No sessions posted yet.</span></div>}
+      {!loading && !error && activeTab === "posts" && posts.length > 0 && <div className="post-list">{posts.map((post) => <PostCard post={post} key={post.id} onDelete={isOwnProfile ? () => void handleDeletePost(post.id) : undefined} isDeleting={deletingPostId === post.id} deleteDisabled={deletingPostId !== null} />)}</div>}
+      {!loading && !error && activeTab === "calendar" && calendarLoading && <div className="state-message">Loading your calendar<span className="loading-dots">...</span></div>}
+      {!loading && !error && activeTab === "calendar" && calendarError && <div className="state-message state-error" role="alert">{calendarError}</div>}
+      {!loading && !error && activeTab === "calendar" && !calendarLoading && !calendarError && <EventCalendar events={calendarEvents} />}
     </section>
   );
 }

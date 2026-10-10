@@ -19,6 +19,7 @@ from app.database.migrations import (
     migrate_user_profile_image,
 )
 from app.database import models
+from app.events.router import router as events_router
 from app.posts.router import router as posts_router
 from app.goals.router import router as goals_router
 from app.users.router import router as users_router
@@ -58,6 +59,7 @@ app.include_router(users_router, prefix="/api")
 app.include_router(posts_router, prefix="/api")
 app.include_router(goals_router, prefix="/api")
 app.include_router(challenges_router, prefix="/api")
+app.include_router(events_router, prefix="/api")
 app.get("/api/health", tags=["health"])(lambda: {"status": "ok"})
 app.mount("/uploads", StaticFiles(directory=settings.upload_dir, check_dir=False), name="uploads")
 

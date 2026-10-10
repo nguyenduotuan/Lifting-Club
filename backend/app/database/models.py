@@ -187,3 +187,39 @@ class ChallengeParticipant(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     challenge: Mapped[Challenge] = relationship(back_populates="participants")
     user: Mapped[User] = relationship()
+
+
+class Event(Base):
+    __tablename__ = "events"
+    __table_args__ = (
+        CheckConstraint("ends_at IS NULL OR ends_at >= starts_at", name="ck_events_end_after_start"),
+        CheckConstraint("max_participants IS NULL OR max_participants >= 2", name="ck_events_max_participants"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    host_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(140))
+    description: Mapped[str] = mapped_column(Text, default="")
+    location: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    is_public: Mapped[bool] = mapped_column(default=False)
+    max_participants: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    host: Mapped[User] = relationship()
+    participants: Mapped[list["EventParticipant"]] = relationship(
+        back_populates="event", cascade="all, delete-orphan", order_by="EventParticipant.id"
+    )
+
+
+class EventParticipant(Base):
+    __tablename__ = "event_participants"
+    __table_args__ = (UniqueConstraint("event_id", "user_id", name="uq_event_participants_user"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    event_id: Mapped[int] = mapped_column(ForeignKey("events.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    status: Mapped[str] = mapped_column(String(20), default="invited")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    event: Mapped[Event] = relationship(back_populates="participants")
+    user: Mapped[User] = relationship()
