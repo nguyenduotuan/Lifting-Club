@@ -32,8 +32,11 @@ def challenge_query():
     )
 
 
-def get_accessible_challenge(db: Session, challenge_id: int, user: User) -> Challenge:
-    challenge = db.scalar(challenge_query().where(Challenge.id == challenge_id))
+def get_accessible_challenge(db: Session, challenge_id: int, user: User, lock: bool = False) -> Challenge:
+    query = challenge_query().where(Challenge.id == challenge_id)
+    if lock:
+        query = query.with_for_update()
+    challenge = db.scalar(query)
     if challenge is None:
         raise HTTPException(status_code=404, detail="Challenge not found.")
     if not challenge.is_public and challenge.host_id != user.id and all(p.user_id != user.id for p in challenge.participants):
@@ -153,7 +156,7 @@ def join_challenge(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> ChallengeRead:
-    challenge = db.scalar(challenge_query().where(Challenge.id == challenge_id))
+    challenge = db.scalar(challenge_query().where(Challenge.id == challenge_id).with_for_update())
     if challenge is None or not challenge.is_public:
         raise HTTPException(status_code=404, detail="Public challenge not found.")
     if challenge.deadline is not None:
@@ -177,7 +180,7 @@ def join_challenge(
 
 @router.post("/{challenge_id}/invite", response_model=ChallengeRead)
 def invite_members(challenge_id: int, payload: ChallengeInvite, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> ChallengeRead:
-    challenge = get_accessible_challenge(db, challenge_id, user)
+    challenge = get_accessible_challenge(db, challenge_id, user, lock=True)
     if challenge.host_id != user.id:
         raise HTTPException(status_code=403, detail="Only the host can invite members.")
     existing_ids = {p.user_id for p in challenge.participants}

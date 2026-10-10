@@ -8,10 +8,11 @@ A shared activity tracker for friends to keep up with events, challenges, and ac
 - FYP shows the newest posts first; profiles show each member's posts.
 - Posts can be regular updates, structured lift sessions, or distance activities with an automatically calculated pace, plus optional photos or videos.
 - Members can privately track personal goals with categories, deadlines, milestones, progress bars, and updates.
+- Members can host private invite-only challenges or publish challenges for everyone to discover and join, with a participant limit.
 - Media is stored on disk; SQLite stores its paths and the post/lift data.
 - The React frontend uses the REST API only. The API can also serve a future mobile client.
 
-There are intentionally no likes, comments, followers, DMs, recommendations, or public discovery features. Registration is open to anyone who can reach the API, so only share the app on a trusted network until account access is restricted.
+Public challenges appear on the homepage and can be sorted by recency or participant count. Private challenges remain visible only to their host and invitees. There are no followers, DMs, or recommendations. Registration is open to anyone who can reach the API, so only share the app on a trusted network until account access is restricted.
 
 ## Requirements
 
@@ -117,6 +118,8 @@ Login artwork is stored in `frontend/public/images/`; use images you have permis
 | `Post` | Author, caption, creation time |
 | `PostMedia` | Post, local file path, image/video type, display order |
 | `Lift` | Post, exercise name, unsigned 32-bit whole-number weight, unit, reps |
+| `Challenge` | Host, title, target, deadline, public/private visibility, optional participant limit |
+| `ChallengeParticipant` | Challenge, member, invite/join status, current progress |
 
 Lift weights are stored as SQLite integers from `0` to `4,294,967,295`. On startup, an older SQLite `FLOAT` weight column is migrated to `INTEGER`, rounding existing values to the nearest whole number while preserving posts. Back up `backend/gym_social.db` and `backend/uploads/` together. Run only one backend instance against this SQLite database.
 
@@ -221,6 +224,11 @@ All API routes are under `/api`. Registration, login, and logout manage a signed
 | `PATCH` | `/goals/{goal_id}/milestones/{milestone_id}` | Toggle a milestone |
 | `POST` | `/goals/{goal_id}/updates` | Add a progress update |
 | `DELETE` | `/goals/{goal_id}` | Delete your goal |
+| `GET` | `/challenges/discover` | List active public challenges by recency or popularity |
+| `GET` | `/challenges` | List your hosted, invited, and joined challenges |
+| `POST` | `/challenges` | Create a private or public challenge |
+| `POST` | `/challenges/{challenge_id}/join` | Join a public challenge with available capacity |
+| `POST` | `/challenges/{challenge_id}/invite` | Invite members to a challenge |
 
 ## Project structure
 
