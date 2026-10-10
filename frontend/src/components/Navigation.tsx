@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Bell, CalendarDays, Dumbbell, Flag, Home, LogOut, Menu, Plus, Settings2, Trophy, X } from "lucide-react";
+import { Bell, CalendarDays, Dumbbell, Flag, Home, LogOut, Menu, Plus, Settings2, Trophy, UserRound, X } from "lucide-react";
 import { getChallenges } from "../api/challenges";
 import { getEvents } from "../api/events";
 import { useAuth } from "../hooks/useAuth";
@@ -114,6 +114,17 @@ export default function Navigation() {
           </button>
         </div>
       </aside>
+      <nav className="bottom-nav" aria-label="Quick navigation">
+        <Link href="/" className={`bottom-nav-link${location === "/" ? " bottom-nav-link-active" : ""}`} aria-current={location === "/" ? "page" : undefined}>
+          <Home size={20} strokeWidth={1.8} /><span>Home</span>
+        </Link>
+        <Link href="/posts" className={`bottom-nav-link${location === "/posts" ? " bottom-nav-link-active" : ""}`} aria-current={location === "/posts" ? "page" : undefined}>
+          <Plus size={20} strokeWidth={1.8} /><span>Posts</span>
+        </Link>
+        <Link href={`/profile/${user.username}`} className={`bottom-nav-link${location.startsWith("/profile") ? " bottom-nav-link-active" : ""}`} aria-current={location.startsWith("/profile") ? "page" : undefined}>
+          <UserRound size={20} strokeWidth={1.8} /><span>Profile</span>
+        </Link>
+      </nav>
     </>
   );
 }
