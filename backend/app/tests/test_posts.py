@@ -37,9 +37,32 @@ def test_create_and_retrieve_post_with_media_and_lift(signed_in_client):
     assert signed_in_client.get("/api/users/alex/posts").json()[0]["id"] == post["id"]
 
 
-def test_post_requires_a_lift(signed_in_client):
-    response = signed_in_client.post("/api/posts", data={"caption": "No lift", "lifts": "[]"})
+def test_post_can_contain_only_a_caption(signed_in_client):
+    response = signed_in_client.post("/api/posts", data={"caption": "Just checking in", "lifts": "[]"})
+    assert response.status_code == 201
+    assert response.json()["lifts"] == []
+
+
+def test_post_requires_some_content(signed_in_client):
+    response = signed_in_client.post("/api/posts", data={"caption": "", "lifts": "[]"})
     assert response.status_code == 422
+
+
+def test_activity_post_calculates_pace(signed_in_client):
+    response = signed_in_client.post(
+        "/api/posts",
+        data={
+            "caption": "Morning run",
+            "lifts": "[]",
+            "activity": '{"name":"Running","distance":5,"distance_unit":"km","duration_seconds":1500}',
+        },
+    )
+    assert response.status_code == 201
+    post = response.json()
+    assert post["activity_name"] == "Running"
+    assert post["distance"] == 5
+    assert post["duration_seconds"] == 1500
+    assert post["pace_seconds_per_unit"] == 300
 
 
 def test_user_can_delete_own_post(signed_in_client):

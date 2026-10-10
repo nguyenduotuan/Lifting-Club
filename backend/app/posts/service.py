@@ -7,6 +7,7 @@ from app.lifts.schemas import LiftCreate
 from app.media.service import StoredMedia, store_upload
 from app.media.storage import delete_file
 from app.posts.repository import PostRepository
+from app.posts.schemas import ActivityCreate
 
 
 async def create_post(
@@ -14,10 +15,13 @@ async def create_post(
     user: User,
     caption: str,
     lifts: list[LiftCreate],
+    activity: ActivityCreate | None,
     uploads: list[UploadFile],
 ) -> Post:
-    if not lifts:
-        raise HTTPException(status_code=422, detail="Add at least one lift to the post.")
+    if not lifts and activity is None and not caption.strip() and not uploads:
+        raise HTTPException(status_code=422, detail="Add a caption, media, lift, or activity to the post.")
+    if lifts and activity is not None:
+        raise HTTPException(status_code=422, detail="Choose either lifts or an activity, not both.")
     if len(caption) > 2000:
         raise HTTPException(status_code=422, detail="Caption must be 2,000 characters or fewer.")
     if len(uploads) > 6:
@@ -31,6 +35,11 @@ async def create_post(
         post = Post(
             user_id=user.id,
             caption=caption.strip(),
+            activity_name=activity.name.strip() if activity else None,
+            distance=activity.distance if activity else None,
+            distance_unit=activity.distance_unit if activity else None,
+            duration_seconds=activity.duration_seconds if activity else None,
+            pace_seconds_per_unit=activity.duration_seconds / activity.distance if activity else None,
             lifts=[
                 Lift(
                     exercise_name=lift.exercise_name,

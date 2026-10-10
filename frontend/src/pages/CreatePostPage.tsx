@@ -11,10 +11,19 @@ function newLift(): LiftInput {
   return { exercise_name: "", weight: 0, unit: "kg", reps: 1 };
 }
 
+type PostMode = "regular" | "strength" | "activity";
+
 export default function CreatePostPage() {
   const [, setLocation] = useLocation();
+  const [postMode, setPostMode] = useState<PostMode>("strength");
   const [caption, setCaption] = useState("");
   const [lifts, setLifts] = useState<LiftInput[]>([newLift()]);
+  const [activityName, setActivityName] = useState("");
+  const [distance, setDistance] = useState("");
+  const [distanceUnit, setDistanceUnit] = useState<"km" | "mi">("km");
+  const [durationHours, setDurationHours] = useState("0");
+  const [durationMinutes, setDurationMinutes] = useState("0");
+  const [durationSeconds, setDurationSeconds] = useState("0");
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -47,8 +56,8 @@ export default function CreatePostPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    const validLifts = lifts.filter((lift) => lift.exercise_name.trim());
-    if (validLifts.length === 0) {
+    const validLifts = postMode === "strength" ? lifts.filter((lift) => lift.exercise_name.trim()) : [];
+    if (postMode === "strength" && validLifts.length === 0) {
       setError("Add at least one lift with an exercise name.");
       return;
     }
@@ -61,9 +70,23 @@ export default function CreatePostPage() {
       return;
     }
 
+    const totalDuration = Number(durationHours) * 3600 + Number(durationMinutes) * 60 + Number(durationSeconds);
+    if (postMode === "activity" && (!activityName.trim() || !Number.isFinite(Number(distance)) || Number(distance) <= 0 || totalDuration <= 0)) {
+      setError("Add an activity, a distance, and a duration greater than zero.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("caption", caption);
     formData.append("lifts", JSON.stringify(validLifts));
+    if (postMode === "activity") {
+      formData.append("activity", JSON.stringify({
+        name: activityName.trim(),
+        distance: Number(distance),
+        distance_unit: distanceUnit,
+        duration_seconds: totalDuration,
+      }));
+    }
     files.forEach((file) => formData.append("media", file));
 
     setSubmitting(true);
@@ -86,7 +109,14 @@ export default function CreatePostPage() {
         <label className="field-label" htmlFor="caption">Caption <span>OPTIONAL</span></label>
         <textarea id="caption" value={caption} onChange={(event) => setCaption(event.target.value)} maxLength={2000} rows={4} placeholder="A note from today's session..." />
 
-        <div className="form-section-heading"><div><p className="eyebrow">THE WORK</p><h2>Lifts</h2></div><button className="button button-small button-secondary" type="button" onClick={() => setLifts((current) => [...current, newLift()])}><Plus size={15} /> Add lift</button></div>
+        <label className="field-label" htmlFor="post-type">What are you logging?</label>
+        <select id="post-type" value={postMode} onChange={(event) => { setPostMode(event.target.value as PostMode); setError(""); }}>
+          <option value="strength">Strength session</option>
+          <option value="activity">Distance activity</option>
+          <option value="regular">Just a post</option>
+        </select>
+
+        {postMode === "strength" && <><div className="form-section-heading"><div><p className="eyebrow">THE WORK</p><h2>Lifts</h2></div><button className="button button-small button-secondary" type="button" onClick={() => setLifts((current) => [...current, newLift()])}><Plus size={15} /> Add lift</button></div>
         <div className="lift-fields">
           {lifts.map((lift, index) => (
             <div className="lift-field-row" key={index}>
@@ -102,6 +132,24 @@ export default function CreatePostPage() {
             </div>
           ))}
         </div>
+        </>}
+
+        {postMode === "activity" && <div className="activity-fields">
+          <div className="form-section-heading"><div><p className="eyebrow">THE DISTANCE</p><h2>Activity</h2></div></div>
+          <label className="field-label" htmlFor="activity-name">Activity</label>
+          <input id="activity-name" value={activityName} onChange={(event) => setActivityName(event.target.value)} maxLength={100} placeholder="Running, cycling, swimming..." />
+          <div className="activity-input-row">
+            <div><label className="field-label" htmlFor="distance">Distance</label><input id="distance" type="number" min="0.01" step="0.01" value={distance} onChange={(event) => setDistance(event.target.value)} placeholder="5" /></div>
+            <div><label className="field-label" htmlFor="distance-unit">Unit</label><select id="distance-unit" value={distanceUnit} onChange={(event) => setDistanceUnit(event.target.value as "km" | "mi")}><option value="km">km</option><option value="mi">mi</option></select></div>
+          </div>
+          <label className="field-label">Time</label>
+          <div className="activity-input-row activity-time-row">
+            <input aria-label="Hours" type="number" min="0" max="99" value={durationHours} onChange={(event) => setDurationHours(event.target.value)} placeholder="Hours" />
+            <input aria-label="Minutes" type="number" min="0" max="59" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)} placeholder="Minutes" />
+            <input aria-label="Seconds" type="number" min="0" max="59" value={durationSeconds} onChange={(event) => setDurationSeconds(event.target.value)} placeholder="Seconds" />
+          </div>
+          <p className="field-hint">Your pace will be calculated and added to the post.</p>
+        </div>}
 
         <div className="form-section-heading media-section-heading"><div><p className="eyebrow">THE MOMENT</p><h2>Media <span className="optional-note">OPTIONAL</span></h2></div></div>
         <label className="upload-zone">

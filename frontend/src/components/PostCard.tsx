@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { CalendarDays, ChevronDown, MessageCircle, Send, Trash2 } from "lucide-react";
+import { CalendarDays, ChevronDown, MessageCircle, Send, Timer, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { createComment, togglePostReaction } from "../api/posts";
 import { useAuth } from "../hooks/useAuth";
@@ -39,6 +39,8 @@ export default function PostCard({ post, onDelete, isDeleting = false, deleteDis
     day: "numeric",
     year: "numeric",
   });
+  const paceSeconds = post.pace_seconds_per_unit ?? 0;
+  const pace = `${Math.floor(paceSeconds / 60)}:${String(Math.round(paceSeconds % 60)).padStart(2, "0")}`;
 
   async function handleCommentSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -86,6 +88,10 @@ export default function PostCard({ post, onDelete, isDeleting = false, deleteDis
       {post.caption && <p className="post-caption">{post.caption}</p>}
       <MediaDisplay items={post.media} />
       <LiftList lifts={post.lifts} />
+      {post.activity_name && post.distance && post.duration_seconds && <div className="activity-summary">
+        <Timer size={17} />
+        <div><strong>{post.activity_name}</strong><span>{post.distance} {post.distance_unit} · {Math.floor(post.duration_seconds / 60)}:{String(post.duration_seconds % 60).padStart(2, "0")} total · {pace} / {post.distance_unit}</span></div>
+      </div>}
       <div className="post-engagement">
         <div className="reaction-list" aria-label="React to post">
           {reactionOptions.map(({ emoji, label }) => {

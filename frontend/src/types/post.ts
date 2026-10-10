@@ -31,6 +31,11 @@ export interface Post {
   user: User;
   caption: string;
   created_at: string;
+  activity_name: string | null;
+  distance: number | null;
+  distance_unit: string | null;
+  duration_seconds: number | null;
+  pace_seconds_per_unit: number | null;
   media: PostMedia[];
   lifts: Lift[];
   comments: PostComment[];

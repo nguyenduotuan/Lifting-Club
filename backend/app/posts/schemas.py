@@ -40,6 +40,21 @@ class ReactionState(BaseModel):
     reactions: list[ReactionRead]
 
 
+class ActivityCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    distance: float = Field(gt=0)
+    distance_unit: Literal["km", "mi"] = "km"
+    duration_seconds: int = Field(gt=0)
+
+
+class ActivityRead(BaseModel):
+    name: str
+    distance: float
+    distance_unit: Literal["km", "mi"]
+    duration_seconds: int
+    pace_seconds_per_unit: float
+
+
 class PostMediaRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -57,6 +72,11 @@ class PostRead(BaseModel):
     user: UserRead
     caption: str
     created_at: datetime
+    activity_name: str | None = None
+    distance: float | None = None
+    distance_unit: str | None = None
+    duration_seconds: int | None = None
+    pace_seconds_per_unit: float | None = None
     media: list[PostMediaRead]
     lifts: list[LiftRead]
     comments: list[CommentRead] = Field(default_factory=list)

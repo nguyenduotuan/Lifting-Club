@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import CheckConstraint, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
@@ -31,6 +31,11 @@ class Post(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     caption: Mapped[str] = mapped_column(Text, default="")
+    activity_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    distance: Mapped[float | None] = mapped_column(Float, nullable=True)
+    distance_unit: Mapped[str | None] = mapped_column(String(2), nullable=True)
+    duration_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    pace_seconds_per_unit: Mapped[float | None] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
     user: Mapped[User] = relationship(back_populates="posts")
     media: Mapped[list["PostMedia"]] = relationship(
