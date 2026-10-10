@@ -1,16 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Bell, CalendarDays, Dumbbell, Flag, Home, LogOut, Menu, Plus, Settings2, Trophy, UserRound, X } from "lucide-react";
+import { Bell, CalendarDays, Dumbbell, Flag, Home, LogOut, Menu, Newspaper, Search, Settings2, Trophy, UserRound, X } from "lucide-react";
 import { getChallenges } from "../api/challenges";
 import { getEvents } from "../api/events";
+import { getUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 import Avatar from "./Avatar";
+import type { User } from "../types/user";
 
 export default function Navigation() {
   const { user, signOut } = useAuth();
   const [location, setLocation] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [people, setPeople] = useState<User[]>([]);
+  const [peopleQuery, setPeopleQuery] = useState("");
+  const [peopleSearchOpen, setPeopleSearchOpen] = useState(false);
+  const peopleSearchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    void getUsers().then((users) => {
+      if (active) setPeople(users);
+    }).catch(() => {
+      if (active) setPeople([]);
+    });
+    return () => { active = false; };
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user) return;
@@ -44,6 +61,22 @@ export default function Navigation() {
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [menuOpen]);
+
+  const matchingPeople = useMemo(() => {
+    const query = peopleQuery.trim().toLocaleLowerCase();
+    if (!query) return [];
+    return people
+      .filter((person) => person.id !== user?.id)
+      .filter((person) => `${person.display_name} ${person.username}`.toLocaleLowerCase().includes(query))
+      .slice(0, 6);
+  }, [people, peopleQuery, user?.id]);
+
+  function visitPerson(username: string) {
+    setPeopleQuery("");
+    setPeopleSearchOpen(false);
+    setMenuOpen(false);
+    setLocation(`/profile/${encodeURIComponent(username)}`);
+  }
 
   async function handleSignOut() {
     await signOut();
@@ -80,6 +113,51 @@ export default function Navigation() {
           <X size={19} />
         </button>
 
+        <div
+          className="sidebar-people-search"
+          ref={peopleSearchRef}
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPeopleSearchOpen(false);
+          }}
+        >
+          <label className="member-picker-field">
+            <Search size={14} aria-hidden="true" />
+            <input
+              type="search"
+              value={peopleQuery}
+              placeholder="Search people..."
+              aria-label="Search people"
+              aria-autocomplete="list"
+              aria-expanded={peopleSearchOpen && Boolean(peopleQuery.trim())}
+              aria-controls="sidebar-people-results"
+              onFocus={() => setPeopleSearchOpen(true)}
+              onChange={(event) => { setPeopleQuery(event.target.value); setPeopleSearchOpen(true); }}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setPeopleSearchOpen(false);
+                if (event.key === "Enter" && matchingPeople.length > 0) {
+                  event.preventDefault();
+                  visitPerson(matchingPeople[0].username);
+                }
+              }}
+            />
+          </label>
+          {peopleSearchOpen && peopleQuery.trim() && <div className="member-picker-dropdown" id="sidebar-people-results" role="listbox">
+            {matchingPeople.map((person) => (
+              <Link
+                className="member-picker-option"
+                href={`/profile/${encodeURIComponent(person.username)}`}
+                key={person.id}
+                role="option"
+                onClick={() => visitPerson(person.username)}
+              >
+                <Avatar username={person.username} displayName={person.display_name} image={person.profile_image} />
+                <span className="member-picker-option-copy"><strong>{person.display_name}</strong><small>@{person.username}</small></span>
+              </Link>
+            ))}
+            {matchingPeople.length === 0 && <p className="member-picker-empty">No matching people.</p>}
+          </div>}
+        </div>
+
         <nav className="primary-nav" aria-label="Main navigation">
           <Link href="/" className={`nav-item${location === "/" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
             <Home size={19} strokeWidth={1.8} /><span>Home</span>
@@ -94,7 +172,7 @@ export default function Navigation() {
             <CalendarDays size={19} strokeWidth={1.8} /><span>Events</span>
           </Link>
           <Link href="/posts" className={`nav-item nav-item-posts${location === "/posts" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
-            <Plus size={19} strokeWidth={1.8} /><span>Posts</span>
+            <Newspaper size={19} strokeWidth={1.8} /><span>FYP</span>
           </Link>
           <Link href="/settings" className={`nav-item${location === "/settings" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
             <Settings2 size={19} strokeWidth={1.8} /><span>Application Settings</span>
@@ -116,7 +194,7 @@ export default function Navigation() {
           <Home size={20} strokeWidth={1.8} /><span>Home</span>
         </Link>
         <Link href="/posts" className={`bottom-nav-link${location === "/posts" ? " bottom-nav-link-active" : ""}`} aria-current={location === "/posts" ? "page" : undefined}>
-          <Plus size={20} strokeWidth={1.8} /><span>Posts</span>
+          <Newspaper size={20} strokeWidth={1.8} /><span>FYP</span>
         </Link>
         <Link href={`/profile/${user.username}`} className={`bottom-nav-link${location.startsWith("/profile") ? " bottom-nav-link-active" : ""}`} aria-current={location.startsWith("/profile") ? "page" : undefined}>
           <UserRound size={20} strokeWidth={1.8} /><span>Profile</span>
