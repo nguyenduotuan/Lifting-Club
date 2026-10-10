@@ -38,24 +38,35 @@ function textRamp(colors: [string, string, string, string, string, string]) {
 
 const noGlow = "0 0 0 transparent";
 
-export const steel: Palette = {
-  bg: "#16181c", surface: "#1f2227", "surface-raised": "#282b31", "surface-sunk": "#15171b", "surface-high": "#50535b",
-  line: rgba("222, 223, 228", 0.11), "line-strong": rgba("222, 223, 228", 0.19),
-  text: "#e9eaed", muted: "#a8abb3", quiet: "#7e828b",
-  ...textRamp(["#f0f0f2", "#e4e5e9", "#d0d2d8", "#b4b6bc", "#9a9ca3", "#85878e"]),
-  accent: "#c5c8cf", "accent-strong": "#eef0f3", "accent-dark": "#8b909a", "on-accent": "#191b20",
-  error: "#e2a3a1", "error-rgb": "226, 163, 161",
-  "ink-rgb": "222, 223, 228", "shade-rgb": "10, 11, 14", "panel-rgb": "30, 34, 37", "shadow-rgb": "0, 0, 0",
-  ...tint("green", { rgb: "80, 112, 91", line: "177, 199, 183", text: "#b8d0c0" }),
-  ...tint("gold", { rgb: "116, 84, 39", line: "215, 185, 130", text: "#d7c094" }),
-  ...tint("blue", { rgb: "70, 98, 128", line: "163, 187, 211", text: "#b9d0e4" }),
-  ...tint("red", { rgb: "115, 67, 58", line: "205, 157, 145", text: "#d7afa4" }),
-  glow: noGlow,
+const magenta: Palette = {
+  bg: "#10091b", surface: "#1b102b", "surface-raised": "#28163d", "surface-sunk": "#0b0612", "surface-high": "#522b73",
+  line: rgba("207, 126, 255", 0.16), "line-strong": rgba("207, 126, 255", 0.32),
+  text: "#f5eaff", muted: "#c1a9d8", quiet: "#9278ad",
+  ...textRamp(["#fff8ff", "#f5eaff", "#e3cef4", "#c6a8df", "#a587c0", "#80659b"]),
+  accent: "#d946ff", "accent-strong": "#f09bff", "accent-dark": "#a51bd1", "on-accent": "#190821",
+  error: "#ff829d", "error-rgb": "255, 130, 157",
+  "ink-rgb": "207, 126, 255", "shade-rgb": "6, 2, 12", "panel-rgb": "27, 16, 43", "shadow-rgb": "5, 0, 12",
+  ...tint("green", { rgb: "38, 112, 93", line: "105, 235, 190", text: "#9ff5d7" }),
+  ...tint("gold", { rgb: "128, 82, 32", line: "255, 193, 89", text: "#ffd38a" }),
+  ...tint("blue", { rgb: "54, 65, 153", line: "132, 153, 255", text: "#b2c1ff" }),
+  ...tint("red", { rgb: "132, 32, 76", line: "255, 112, 165", text: "#ff9bc2" }),
+  glow: "0 0 18px rgba(217, 70, 255, 0.38)",
 };
 
-const field: Palette = { ...steel, accent: "#a9c6ad", "accent-strong": "#e1f0e2", "accent-dark": "#708e76" };
-
-const signal: Palette = { ...steel, accent: "#e6a18d", "accent-strong": "#ffe4d9", "accent-dark": "#a96554" };
+const kawaii: Palette = {
+  bg: "#fff1f7", surface: "#fff8fb", "surface-raised": "#ffffff", "surface-sunk": "#f9dfeb", "surface-high": "#f1b9d3",
+  line: rgba("170, 55, 105", 0.14), "line-strong": rgba("170, 55, 105", 0.25),
+  text: "#51243c", muted: "#87516d", quiet: "#ad7994",
+  ...textRamp(["#42172f", "#51243c", "#6b3552", "#87516d", "#a66d89", "#bd8ca4"]),
+  accent: "#ec5b9b", "accent-strong": "#ff9ec7", "accent-dark": "#c73578", "on-accent": "#ffffff",
+  error: "#c93454", "error-rgb": "201, 52, 84",
+  "ink-rgb": "170, 55, 105", "shade-rgb": "255, 235, 244", "panel-rgb": "255, 250, 252", "shadow-rgb": "121, 45, 84",
+  ...tint("green", { rgb: "70, 151, 112", line: "69, 144, 105", text: "#397c5a" }),
+  ...tint("gold", { rgb: "204, 143, 48", line: "173, 113, 26", text: "#96600f" }),
+  ...tint("blue", { rgb: "95, 137, 198", line: "74, 115, 174", text: "#3e659c" }),
+  ...tint("red", { rgb: "210, 79, 111", line: "182, 55, 88", text: "#a93450" }),
+  glow: "0 0 16px rgba(236, 91, 155, 0.24)",
+};
 
 const babyBlue: Palette = {
   bg: "#e3f1fb", surface: "#f3f9fe", "surface-raised": "#ffffff", "surface-sunk": "#d3e8f7", "surface-high": "#a8cfea",
@@ -88,9 +99,8 @@ const dracula: Palette = {
 };
 
 export const themes = [
-  { id: "steel", name: "Steel", description: "The original Circuit look", swatch: "#c5c8cf", colorScheme: "dark", palette: steel },
-  { id: "field", name: "Field", description: "A quieter, natural accent", swatch: "#a9c6ad", colorScheme: "dark", palette: field },
-  { id: "signal", name: "Signal", description: "A warmer training-room accent", swatch: "#e6a18d", colorScheme: "dark", palette: signal },
+  { id: "magenta", name: "Magenta", description: "Shiny violet neon on a deep night backdrop", swatch: "#d946ff", colorScheme: "dark", palette: magenta },
+  { id: "kawaii", name: "Kawaii", description: "Cute, soft pink with a rosy glow", swatch: "#ec5b9b", colorScheme: "light", palette: kawaii },
   { id: "baby-blue", name: "Baby Blue", description: "A bright, airy light theme", swatch: "#89cff0", colorScheme: "light", palette: babyBlue },
   { id: "dracula", name: "Dracula", description: "Deep red with neon red highlights", swatch: "#ff1f3d", colorScheme: "dark", palette: dracula },
 ] as const;

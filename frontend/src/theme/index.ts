@@ -3,7 +3,7 @@ import { themes, type ThemeId } from "./palettes";
 export { themes, type ThemeId };
 
 const STORAGE_KEY = "circuit-theme";
-export const DEFAULT_THEME: ThemeId = "steel";
+export const DEFAULT_THEME: ThemeId = "magenta";
 
 export function isThemeId(value: string | null): value is ThemeId {
   return themes.some((theme) => theme.id === value);
