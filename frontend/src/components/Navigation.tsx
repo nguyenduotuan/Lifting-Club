@@ -80,6 +80,9 @@ export default function Navigation() {
 
         <nav className="primary-nav" aria-label="Main navigation">
           <Link href="/" className={`nav-item${location === "/" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
+            <Home size={19} strokeWidth={1.8} /><span>Home</span>
+          </Link>
+          <Link href="/feed" className={`nav-item${location === "/feed" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
             <Activity size={19} strokeWidth={1.8} /><span>FYP</span>
           </Link>
           <Link href="/create" className={`nav-item${location === "/create" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
@@ -126,8 +129,8 @@ export default function Navigation() {
         <Link href="/" className={`mobile-bottom-nav-item${location === "/" ? " mobile-bottom-nav-item-active" : ""}`}>
           <Home size={19} strokeWidth={1.8} /><span>Home</span>
         </Link>
-        <Link href="/goals" className={`mobile-bottom-nav-item${location === "/goals" ? " mobile-bottom-nav-item-active" : ""}`}>
-          <Flag size={19} strokeWidth={1.8} /><span>Goals</span>
+        <Link href="/feed" className={`mobile-bottom-nav-item${location === "/feed" ? " mobile-bottom-nav-item-active" : ""}`}>
+          <Activity size={19} strokeWidth={1.8} /><span>FYP</span>
         </Link>
         <Link href="/create" className={`mobile-bottom-nav-item${location === "/create" ? " mobile-bottom-nav-item-active" : ""}`}>
           <Plus size={21} strokeWidth={1.8} /><span>Create</span>

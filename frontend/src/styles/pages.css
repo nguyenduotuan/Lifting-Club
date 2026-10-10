@@ -37,6 +37,26 @@
 .page-heading { display: flex; align-items: end; justify-content: space-between; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
 .page-heading h1 { margin: 9px 0 0; color: #ededef; font-family: var(--display); font-size: 34px; font-weight: 500; line-height: 1; }
 .heading-period { color: #aeb0b7; }
+.portal-heading { padding: 7px 0 27px; border-bottom: 1px solid var(--line); }
+.portal-heading h1 { margin: 13px 0 9px; color: #ededef; font-family: var(--display); font-size: 38px; font-weight: 500; line-height: 1; }
+.portal-heading > p:last-child { margin: 0; color: var(--muted); font-size: 12px; }
+.portal-section { padding-top: 27px; }
+.portal-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.portal-section-heading h2 { margin: 0; color: #e3e4e8; font-family: var(--display); font-size: 20px; font-weight: 500; }
+.portal-section-heading > span { color: var(--quiet); font-size: 8px; font-weight: 600; letter-spacing: .13em; }
+.portal-destinations { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.portal-destination { display: grid; min-width: 0; min-height: 94px; grid-template-columns: 22px 38px minmax(0, 1fr) 18px; align-items: center; gap: 11px; padding: 14px 13px; border: 1px solid var(--line); border-radius: 5px; background: rgba(222, 223, 228, .025); transition: border-color .18s, background .18s, transform .18s; animation: login-arrive .4s both; }
+.portal-destination:nth-child(2) { animation-delay: 45ms; }
+.portal-destination:nth-child(3) { animation-delay: 90ms; }
+.portal-destination:nth-child(4) { animation-delay: 135ms; }
+.portal-destination:nth-child(5) { animation-delay: 180ms; }
+.portal-destination:hover { transform: translateY(-2px); border-color: var(--line-strong); background: rgba(222, 223, 228, .06); }
+.portal-destination-number { align-self: start; padding-top: 3px; color: var(--quiet); font-size: 9px; font-variant-numeric: tabular-nums; }
+.portal-destination-icon { display: grid; width: 36px; height: 36px; place-items: center; color: #c5c8cf; border: 1px solid var(--line-strong); border-radius: 4px; background: rgba(222, 223, 228, .035); }
+.portal-destination-copy { display: grid; min-width: 0; gap: 5px; }
+.portal-destination-copy strong { color: #e2e3e7; font-size: 12px; font-weight: 600; }
+.portal-destination-copy small { color: var(--quiet); font-size: 10px; line-height: 1.45; }
+.portal-destination-arrow { align-self: start; color: #85878e; }
 .refresh-button { margin-bottom: 1px; }
 .refresh-button:hover svg { transform: rotate(35deg); }
 .refresh-button svg { transition: transform .2s ease; }
@@ -210,6 +230,8 @@
   .nav-item svg { width: 19px; height: 19px; }
   .nav-account { display: flex; margin-top: auto; }
   .app-main { min-height: 100vh; margin-left: 0; padding: 90px 22px 104px; }
+  .portal-heading h1 { font-size: 34px; }
+  .portal-destinations { grid-template-columns: 1fr; }
   .mobile-bottom-nav { position: fixed; z-index: 7; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(4, 1fr); height: 70px; padding: 7px 18px max(7px, env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: rgba(20, 22, 26, .96); box-shadow: 0 -12px 30px rgba(0, 0, 0, .2); backdrop-filter: blur(18px); }
   .mobile-bottom-nav-item { display: flex; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 5px; color: #85878e; border-radius: 5px; font-size: 10px; font-weight: 600; }
   .mobile-bottom-nav-item:hover { color: #dedfe3; background: rgba(222, 223, 228, .05); }

@@ -8,6 +8,7 @@ import CreatePostPage from "./pages/CreatePostPage";
 import FeedPage from "./pages/FeedPage";
 import GoalsPage from "./pages/GoalsPage";
 import LoginPage from "./pages/LoginPage";
+import PortalPage from "./pages/PortalPage";
 import ProfilePage from "./pages/ProfilePage";
 
 function LocationRedirect({ to }: { to: string }) {
@@ -41,13 +42,14 @@ function AppRoutes() {
   return (
     <Switch>
       <Route path="/login"><LoginRoute /></Route>
+      <Route path="/feed"><RequireAuth><FeedPage /></RequireAuth></Route>
       <Route path="/create"><RequireAuth><CreatePostPage /></RequireAuth></Route>
       <Route path="/goals"><RequireAuth><GoalsPage /></RequireAuth></Route>
       <Route path="/challenges"><RequireAuth><ChallengesPage /></RequireAuth></Route>
       <Route path="/challenges/:id"><RequireAuth><ChallengeDetailPage /></RequireAuth></Route>
       <Route path="/profile"><RequireAuth><ProfileRedirect /></RequireAuth></Route>
       <Route path="/profile/:username"><RequireAuth><ProfilePage /></RequireAuth></Route>
-      <Route path="/"><RequireAuth><FeedPage /></RequireAuth></Route>
+      <Route path="/"><RequireAuth><PortalPage /></RequireAuth></Route>
       <Route><LocationRedirect to="/" /></Route>
     </Switch>
   );
