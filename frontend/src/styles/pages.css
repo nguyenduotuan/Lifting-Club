@@ -38,8 +38,8 @@
 .notification-browse-actions { display: flex; flex-wrap: wrap; gap: 9px; }
 .events-empty { padding-top: 52px; }
 .app-main { position: relative; isolation: isolate; min-height: 100vh; margin-left: 246px; padding: 50px clamp(28px, 6vw, 88px) 72px; background: var(--bg); }
-html[data-theme="white-gold"] .side-nav { background-image: linear-gradient(180deg, rgba(245, 243, 237, .88), rgba(245, 243, 237, .93) 52%, rgba(245, 243, 237, .97)), linear-gradient(90deg, rgba(245, 243, 237, .3), rgba(245, 243, 237, .68)), url("/images/angel2.jpeg"); }
-html[data-theme="white-gold"] .app-main { background-color: var(--bg); background-image: linear-gradient(rgba(245, 243, 237, .91), rgba(245, 243, 237, .94)), url("/images/angel2.jpeg"); background-position: center top; background-size: cover; background-attachment: fixed; }
+html[data-theme="white-gold"] .side-nav { background-image: linear-gradient(180deg, rgba(245, 243, 237, .8), rgba(245, 243, 237, .87) 52%, rgba(245, 243, 237, .94)), linear-gradient(90deg, rgba(245, 243, 237, .25), rgba(245, 243, 237, .55)), url("/images/angel2.jpeg"); }
+html[data-theme="white-gold"] .app-main { background-color: var(--bg); background-image: linear-gradient(rgba(245, 243, 237, .84), rgba(245, 243, 237, .9)), url("/images/angel2.jpeg"); background-position: center top; background-size: cover; background-attachment: fixed; }
 .app-main::before { position: absolute; z-index: -1; inset: 0; background-image: linear-gradient(rgba(var(--ink-rgb), .018) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--ink-rgb), .018) 1px, transparent 1px); background-size: 72px 72px; background-position: 0 0; animation: background-drift 100s linear infinite; content: ""; pointer-events: none; }
 .page-column { width: min(100%, 696px); margin: 0 auto; }
 .settings-section { padding: 25px 0 27px; border-bottom: 1px solid var(--line); }
