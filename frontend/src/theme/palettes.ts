@@ -38,6 +38,21 @@ function textRamp(colors: [string, string, string, string, string, string]) {
 
 const noGlow = "0 0 0 transparent";
 
+const original: Palette = {
+  bg: "#11151d", surface: "#181d27", "surface-raised": "#202633", "surface-sunk": "#0d1118", "surface-high": "#424b5a",
+  line: rgba("207, 216, 230", 0.12), "line-strong": rgba("207, 216, 230", 0.21),
+  text: "#e9edf4", muted: "#a9b3c3", quiet: "#818b9b",
+  ...textRamp(["#f3f5f8", "#e9edf4", "#d5dce7", "#b6c0d0", "#9aa5b6", "#7e899a"]),
+  accent: "#aab5c5", "accent-strong": "#e3e9f2", "accent-dark": "#7c8a9e", "on-accent": "#11151d",
+  error: "#e2a3a1", "error-rgb": "226, 163, 161",
+  "ink-rgb": "207, 216, 230", "shade-rgb": "10, 14, 22", "panel-rgb": "24, 29, 39", "shadow-rgb": "0, 0, 0",
+  ...tint("green", { rgb: "58, 94, 72", line: "139, 174, 148", text: "#a9c6b1" }),
+  ...tint("gold", { rgb: "104, 78, 39", line: "191, 164, 112", text: "#d1bb8b" }),
+  ...tint("blue", { rgb: "49, 70, 100", line: "124, 150, 183", text: "#a9bfd9" }),
+  ...tint("red", { rgb: "106, 54, 52", line: "190, 129, 122", text: "#d5aaa4" }),
+  glow: noGlow,
+};
+
 const monochrome: Palette = {
   bg: "#f2f2f2", surface: "#fafafa", "surface-raised": "#ffffff", "surface-sunk": "#e8e8e8", "surface-high": "#d0d0d0",
   line: rgba("20, 20, 20", 0.12), "line-strong": rgba("20, 20, 20", 0.22),
@@ -68,34 +83,19 @@ const whiteGold: Palette = {
   glow: "0 0 14px rgba(168, 140, 83, 0.18)",
 };
 
-const blackGold: Palette = {
-  bg: "#10100e", surface: "#191916", "surface-raised": "#24231e", "surface-sunk": "#0b0b09", "surface-high": "#51462b",
-  line: rgba("226, 190, 112", 0.14), "line-strong": rgba("226, 190, 112", 0.28),
-  text: "#f2eee3", muted: "#c0b89f", quiet: "#928a75",
-  ...textRamp(["#fffdf6", "#f2eee3", "#ded7c4", "#c0b89f", "#a59b80", "#81775f"]),
-  accent: "#d9b45b", "accent-strong": "#f5d88a", "accent-dark": "#a78332", "on-accent": "#17130a",
-  error: "#e58b7f", "error-rgb": "229, 139, 127",
-  "ink-rgb": "226, 190, 112", "shade-rgb": "8, 8, 6", "panel-rgb": "25, 25, 22", "shadow-rgb": "0, 0, 0",
-  ...tint("green", { rgb: "37, 91, 64", line: "112, 176, 132", text: "#a4d1ae" }),
-  ...tint("gold", { rgb: "112, 83, 27", line: "226, 190, 112", text: "#f0d58d" }),
-  ...tint("blue", { rgb: "43, 71, 99", line: "111, 151, 188", text: "#a9c8e2" }),
-  ...tint("red", { rgb: "102, 45, 38", line: "196, 112, 99", text: "#e2a79b" }),
-  glow: "0 0 16px rgba(217, 180, 91, 0.28)",
-};
-
-const magenta: Palette = {
-  bg: "#10091b", surface: "#1b102b", "surface-raised": "#28163d", "surface-sunk": "#0b0612", "surface-high": "#522b73",
-  line: rgba("207, 126, 255", 0.16), "line-strong": rgba("207, 126, 255", 0.32),
-  text: "#f5eaff", muted: "#c1a9d8", quiet: "#9278ad",
-  ...textRamp(["#fff8ff", "#f5eaff", "#e3cef4", "#c6a8df", "#a587c0", "#80659b"]),
-  accent: "#d946ff", "accent-strong": "#f09bff", "accent-dark": "#a51bd1", "on-accent": "#190821",
-  error: "#ff829d", "error-rgb": "255, 130, 157",
-  "ink-rgb": "207, 126, 255", "shade-rgb": "6, 2, 12", "panel-rgb": "27, 16, 43", "shadow-rgb": "5, 0, 12",
-  ...tint("green", { rgb: "38, 112, 93", line: "105, 235, 190", text: "#9ff5d7" }),
-  ...tint("gold", { rgb: "128, 82, 32", line: "255, 193, 89", text: "#ffd38a" }),
-  ...tint("blue", { rgb: "54, 65, 153", line: "132, 153, 255", text: "#b2c1ff" }),
-  ...tint("red", { rgb: "132, 32, 76", line: "255, 112, 165", text: "#ff9bc2" }),
-  glow: "0 0 18px rgba(217, 70, 255, 0.38)",
+const darkWhiteGold: Palette = {
+  bg: "#0c0c0b", surface: "#151514", "surface-raised": "#1f1f1d", "surface-sunk": "#070707", "surface-high": "#41403b",
+  line: rgba("205, 196, 173", 0.13), "line-strong": rgba("205, 196, 173", 0.24),
+  text: "#eeeae1", muted: "#b5b0a5", quiet: "#89857c",
+  ...textRamp(["#fbf9f4", "#eeeae1", "#d9d5cb", "#b5b0a5", "#979287", "#77736a"]),
+  accent: "#b49a65", "accent-strong": "#d0bc8d", "accent-dark": "#81704a", "on-accent": "#11100d",
+  error: "#a39a89", "error-rgb": "163, 154, 137",
+  "ink-rgb": "205, 196, 173", "shade-rgb": "8, 8, 7", "panel-rgb": "21, 21, 20", "shadow-rgb": "0, 0, 0",
+  ...tint("green", { rgb: "94, 91, 80", line: "153, 146, 126", text: "#c1b89f" }),
+  ...tint("gold", { rgb: "103, 88, 58", line: "183, 159, 111", text: "#d2c094" }),
+  ...tint("blue", { rgb: "82, 83, 82", line: "151, 150, 145", text: "#c3c1ba" }),
+  ...tint("red", { rgb: "100, 83, 76", line: "169, 146, 130", text: "#c9b8a6" }),
+  glow: "0 0 14px rgba(180, 154, 101, 0.2)",
 };
 
 const kawaii: Palette = {
@@ -111,21 +111,6 @@ const kawaii: Palette = {
   ...tint("blue", { rgb: "95, 137, 198", line: "74, 115, 174", text: "#3e659c" }),
   ...tint("red", { rgb: "210, 79, 111", line: "182, 55, 88", text: "#a93450" }),
   glow: "0 0 16px rgba(236, 91, 155, 0.24)",
-};
-
-const babyBlue: Palette = {
-  bg: "#e3f1fb", surface: "#f3f9fe", "surface-raised": "#ffffff", "surface-sunk": "#d3e8f7", "surface-high": "#a8cfea",
-  line: rgba("20, 60, 110", 0.14), "line-strong": rgba("20, 60, 110", 0.24),
-  text: "#12304f", muted: "#4f6f8f", quiet: "#7a96b0",
-  ...textRamp(["#0b2440", "#12304f", "#1d405f", "#3d5f80", "#58779a", "#7590ab"]),
-  accent: "#2b8bd6", "accent-strong": "#7cc4f2", "accent-dark": "#1c6aa8", "on-accent": "#08233d",
-  error: "#c2463d", "error-rgb": "194, 70, 61",
-  "ink-rgb": "20, 60, 110", "shade-rgb": "232, 244, 253", "panel-rgb": "255, 255, 255", "shadow-rgb": "40, 90, 140",
-  ...tint("green", { rgb: "58, 160, 205", line: "40, 120, 170", text: "#1d6f9c" }),
-  ...tint("gold", { rgb: "96, 140, 225", line: "60, 100, 190", text: "#3558b0" }),
-  ...tint("blue", { rgb: "60, 125, 210", line: "35, 95, 170", text: "#1f5fa6" }),
-  ...tint("red", { rgb: "130, 120, 225", line: "95, 85, 190", text: "#5a4fb5" }),
-  glow: noGlow,
 };
 
 const dracula: Palette = {
@@ -144,12 +129,11 @@ const dracula: Palette = {
 };
 
 export const themes = [
+  { id: "original", name: "Original", description: "The original deep navy and graphite Circuit look", swatch: "#aab5c5", colorScheme: "dark", palette: original },
   { id: "monochrome", name: "Monochrome", description: "Crisp white, soft gray, and bold black", swatch: "#202020", colorScheme: "light", palette: monochrome },
   { id: "white-gold", name: "White Gold", description: "A Baroque-inspired ivory, gold, and charcoal palette", swatch: "#a88c53", colorScheme: "light", palette: whiteGold },
-  { id: "black-gold", name: "Black Gold", description: "Warm gold accents on a deep black finish", swatch: "#d9b45b", colorScheme: "dark", palette: blackGold },
-  { id: "magenta", name: "Magenta", description: "Shiny violet neon on a deep night backdrop", swatch: "#d946ff", colorScheme: "dark", palette: magenta },
+  { id: "dark-white-gold", name: "Dark White Gold", description: "Near-black charcoal with restrained antique gold", swatch: "#b49a65", colorScheme: "dark", palette: darkWhiteGold },
   { id: "kawaii", name: "Kawaii", description: "Cute, soft pink with a rosy glow", swatch: "#ec5b9b", colorScheme: "light", palette: kawaii },
-  { id: "baby-blue", name: "Baby Blue", description: "A bright, airy light theme", swatch: "#89cff0", colorScheme: "light", palette: babyBlue },
   { id: "dracula", name: "Dracula", description: "Deep red with neon red highlights", swatch: "#ff1f3d", colorScheme: "dark", palette: dracula },
 ] as const;
 

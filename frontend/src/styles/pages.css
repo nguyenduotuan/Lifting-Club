@@ -1,5 +1,5 @@
 .app-shell { min-height: 100vh; }
-.side-nav { position: fixed; z-index: 5; inset: 0 auto 0 0; display: flex; width: 246px; flex-direction: column; overflow-y: auto; overscroll-behavior: contain; padding: 28px 18px 20px; border-right: 1px solid var(--line); background: linear-gradient(180deg, rgba(var(--shade-rgb), .68), rgba(var(--shade-rgb), .84) 52%, rgba(var(--shade-rgb), .96)), linear-gradient(90deg, rgba(var(--shade-rgb), .22), rgba(var(--shade-rgb), .5)), url("/images/angel3.jpg") center / cover no-repeat; }
+.side-nav { --nav-image-top: .68; --nav-image-mid: .84; --nav-image-bottom: .96; --nav-image-left: .22; --nav-image-right: .5; position: fixed; z-index: 5; inset: 0 auto 0 0; display: flex; width: 246px; flex-direction: column; overflow-y: auto; overscroll-behavior: contain; padding: 28px 18px 20px; border-right: 1px solid var(--line); background: linear-gradient(180deg, rgba(var(--shade-rgb), var(--nav-image-top)), rgba(var(--shade-rgb), var(--nav-image-mid)) 52%, rgba(var(--shade-rgb), var(--nav-image-bottom))), linear-gradient(90deg, rgba(var(--shade-rgb), var(--nav-image-left)), rgba(var(--shade-rgb), var(--nav-image-right))), url("/images/angel3.jpg") center / cover no-repeat; }
 .brand-lockup { display: flex; align-items: center; gap: 11px; padding: 2px 9px; }
 .brand-symbol { display: grid; width: 37px; height: 37px; flex: 0 0 37px; place-items: center; color: var(--text-3); border: 1px solid rgba(var(--ink-rgb), .25); border-radius: 50%; background: linear-gradient(145deg, rgba(var(--ink-rgb), .12), rgba(var(--ink-rgb), .035)); }
 .brand-copy { display: grid; gap: 3px; }
@@ -38,8 +38,12 @@
 .notification-browse-actions { display: flex; flex-wrap: wrap; gap: 9px; }
 .events-empty { padding-top: 52px; }
 .app-main { position: relative; isolation: isolate; min-height: 100vh; margin-left: 246px; padding: 50px clamp(28px, 6vw, 88px) 72px; background: var(--bg); }
-html[data-theme="white-gold"] .side-nav { background-image: linear-gradient(180deg, rgba(245, 243, 237, .65), rgba(245, 243, 237, .75) 52%, rgba(245, 243, 237, .85)), linear-gradient(90deg, rgba(245, 243, 237, .15), rgba(245, 243, 237, .4)), url("/images/angel3.jpg"); }
+html[data-theme="white-gold"] .side-nav { --nav-image-top: .65; --nav-image-mid: .75; --nav-image-bottom: .85; --nav-image-left: .15; --nav-image-right: .4; }
 html[data-theme="white-gold"] .app-main { background-color: var(--bg); background-image: linear-gradient(rgba(245, 243, 237, .72), rgba(245, 243, 237, .8)), url("/images/angel4.jpg"); background-position: center top; background-size: cover; background-attachment: fixed; }
+html[data-theme="original"] .side-nav { --nav-image-top: .48; --nav-image-mid: .59; --nav-image-bottom: .72; --nav-image-left: .2; --nav-image-right: .4; }
+html[data-theme="original"] .app-main { background-color: var(--bg); background-image: linear-gradient(rgba(var(--shade-rgb), .46), rgba(var(--shade-rgb), .58)), url("/images/angel4.jpg"); background-position: center top; background-size: cover; background-attachment: fixed; }
+html[data-theme="dark-white-gold"] .side-nav { --nav-image-top: .48; --nav-image-mid: .59; --nav-image-bottom: .72; --nav-image-left: .2; --nav-image-right: .4; }
+html[data-theme="dark-white-gold"] .app-main { background-color: var(--bg); background-image: linear-gradient(rgba(var(--shade-rgb), .46), rgba(var(--shade-rgb), .58)), url("/images/angel4.jpg"); background-position: center top; background-size: cover; background-attachment: fixed; }
 .app-main::before { position: absolute; z-index: -1; inset: 0; background-image: linear-gradient(rgba(var(--ink-rgb), .018) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--ink-rgb), .018) 1px, transparent 1px); background-size: 72px 72px; background-position: 0 0; animation: background-drift 100s linear infinite; content: ""; pointer-events: none; }
 .page-column { width: min(100%, 696px); margin: 0 auto; }
 .settings-section { padding: 25px 0 27px; border-bottom: 1px solid var(--line); }
@@ -453,7 +457,7 @@ html[data-theme="white-gold"] .app-main { background-color: var(--bg); backgroun
   .mobile-topbar .brand-symbol { width: 34px; height: 34px; flex-basis: 34px; }
   .mobile-menu-toggle { color: var(--text-2); }
   .mobile-menu-backdrop { position: fixed; z-index: 9; inset: 0; display: block; padding: 0; border: 0; background: rgba(var(--shade-rgb), .62); backdrop-filter: blur(3px); }
-  .side-nav { z-index: 10; inset: 0 auto 0 0; width: min(300px, 86vw); height: 100dvh; flex-direction: column; align-items: stretch; justify-content: flex-start; overflow-y: auto; overscroll-behavior: contain; padding: 24px 18px 20px; border-top: 0; border-right: 1px solid var(--line); background: linear-gradient(180deg, rgba(var(--shade-rgb), .78), rgba(var(--shade-rgb), .96)), url("/images/angel3.jpg") center / cover no-repeat; box-shadow: 24px 0 60px rgba(var(--shadow-rgb), .35); transform: translateX(-101%); visibility: hidden; transition: transform .24s ease, visibility .24s step-end; }
+  .side-nav { z-index: 10; inset: 0 auto 0 0; width: min(300px, 86vw); height: 100dvh; flex-direction: column; align-items: stretch; justify-content: flex-start; overflow-y: auto; overscroll-behavior: contain; padding: 24px 18px 20px; border-top: 0; border-right: 1px solid var(--line); box-shadow: 24px 0 60px rgba(var(--shadow-rgb), .35); transform: translateX(-101%); visibility: hidden; transition: transform .24s ease, visibility .24s step-end; }
   .side-nav-open { transform: translateX(0); visibility: visible; transition: transform .24s ease, visibility 0s; }
   .side-nav .brand-lockup { display: flex; padding: 2px 9px; }
   .mobile-nav-close { position: absolute; top: 23px; right: 16px; display: inline-grid; }
