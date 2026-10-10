@@ -38,6 +38,21 @@ function textRamp(colors: [string, string, string, string, string, string]) {
 
 const noGlow = "0 0 0 transparent";
 
+const monochrome: Palette = {
+  bg: "#f2f2f2", surface: "#fafafa", "surface-raised": "#ffffff", "surface-sunk": "#e8e8e8", "surface-high": "#d0d0d0",
+  line: rgba("20, 20, 20", 0.12), "line-strong": rgba("20, 20, 20", 0.22),
+  text: "#202020", muted: "#5e5e5e", quiet: "#858585",
+  ...textRamp(["#111111", "#202020", "#383838", "#555555", "#737373", "#909090"]),
+  accent: "#202020", "accent-strong": "#4a4a4a", "accent-dark": "#080808", "on-accent": "#ffffff",
+  error: "#bd3d3d", "error-rgb": "189, 61, 61",
+  "ink-rgb": "20, 20, 20", "shade-rgb": "230, 230, 230", "panel-rgb": "255, 255, 255", "shadow-rgb": "20, 20, 20",
+  ...tint("green", { rgb: "74, 125, 91", line: "69, 125, 89", text: "#356344" }),
+  ...tint("gold", { rgb: "157, 117, 49", line: "143, 103, 37", text: "#75531c" }),
+  ...tint("blue", { rgb: "70, 105, 139", line: "62, 98, 134", text: "#345777" }),
+  ...tint("red", { rgb: "151, 76, 76", line: "143, 65, 65", text: "#783838" }),
+  glow: noGlow,
+};
+
 const magenta: Palette = {
   bg: "#10091b", surface: "#1b102b", "surface-raised": "#28163d", "surface-sunk": "#0b0612", "surface-high": "#522b73",
   line: rgba("207, 126, 255", 0.16), "line-strong": rgba("207, 126, 255", 0.32),
@@ -99,6 +114,7 @@ const dracula: Palette = {
 };
 
 export const themes = [
+  { id: "monochrome", name: "Monochrome", description: "Crisp white, soft gray, and bold black", swatch: "#202020", colorScheme: "light", palette: monochrome },
   { id: "magenta", name: "Magenta", description: "Shiny violet neon on a deep night backdrop", swatch: "#d946ff", colorScheme: "dark", palette: magenta },
   { id: "kawaii", name: "Kawaii", description: "Cute, soft pink with a rosy glow", swatch: "#ec5b9b", colorScheme: "light", palette: kawaii },
   { id: "baby-blue", name: "Baby Blue", description: "A bright, airy light theme", swatch: "#89cff0", colorScheme: "light", palette: babyBlue },
