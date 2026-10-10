@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import { CalendarClock, Globe2, MapPin, Pin, Plus, Users } from "lucide-react";
 import { createEvent, getEvents, getPublicEvents } from "../api/events";
@@ -66,6 +66,7 @@ export default function EventsPage() {
   const [members, setMembers] = useState<User[]>([]);
   const [form, setForm] = useState<EventCreateInput>(emptyForm);
   const [showForm, setShowForm] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const [activeCategory, setActiveCategory] = useState<EventCategory>(() => new URLSearchParams(window.location.search).get("category") === "public" ? "public" : "private");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -88,6 +89,10 @@ export default function EventsPage() {
     void loadEvents();
     getUsers().then(setMembers).catch(() => setMembers([]));
   }, []);
+
+  useEffect(() => {
+    if (showForm) formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [showForm]);
 
   const privateVisible = useMemo(() => events.filter((event) => event.host_id !== user?.id && !event.is_public && ["invited", "accepted"].includes(membership(event, user?.id)?.status ?? "") && !eventHasEnded(event)), [events, user]);
   const hosted = useMemo(() => events.filter((event) => event.host_id === user?.id && !eventHasEnded(event)), [events, user]);
@@ -122,10 +127,10 @@ export default function EventsPage() {
   return <section className="page-column events-page">
     <header className="page-heading goals-heading">
       <div><p className="eyebrow">MAKE A PLAN TOGETHER</p><h1>Events<span className="heading-period">.</span></h1><p className="goals-intro">Put a date on it and bring your people together.</p></div>
-      <button className="button button-primary" type="button" onClick={() => setShowForm((open) => !open)}><Plus size={16} /> New event</button>
+      {activeCategory !== "hosted" && <button className="button button-primary" type="button" onClick={() => setShowForm((open) => !open)}><Plus size={16} /> New event</button>}
     </header>
 
-    {showForm && <form className="goal-create-panel" onSubmit={submitEvent}>
+    {showForm && <form ref={formRef} className="goal-create-panel" onSubmit={submitEvent}>
       <div className="goal-create-heading"><div><p className="eyebrow">HOST SOMETHING</p><h2>Set up an event</h2></div><button className="icon-button" type="button" onClick={() => setShowForm(false)} aria-label="Close event form">×</button></div>
       <div className="goal-form-grid event-form-grid">
         <div><label className="field-label" htmlFor="event-title">Event</label><input id="event-title" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="Saturday morning lift" required maxLength={140} /></div>
@@ -185,5 +190,8 @@ export default function EventsPage() {
       <span className="goals-empty-mark"><CalendarClock size={23} /></span><p className="eyebrow">YOUR SHARED CALENDAR</p><h2>Nothing on the calendar yet.</h2>
       <button className="button button-secondary" type="button" onClick={() => setShowForm(true)}>Create your first event</button>
     </div>}
+    {activeCategory === "hosted" && <button className="button button-primary hosted-create-fab" type="button" onClick={() => setShowForm((open) => !open)} aria-expanded={showForm}>
+      {showForm ? "Close event form" : <><Plus size={16} /> New event</>}
+    </button>}
   </section>;
 }

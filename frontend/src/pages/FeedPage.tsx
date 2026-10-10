@@ -43,7 +43,6 @@ export default function FeedPage() {
         <div><p className="eyebrow">THE INNER CIRCLE</p><h1>Posts<span className="heading-period">.</span></h1></div>
         <div className="posts-heading-actions">
           <button className="icon-button refresh-button" type="button" onClick={() => void loadPosts()} aria-label="Refresh posts" title="Refresh posts"><RotateCw size={17} /></button>
-          <button className="button button-primary" type="button" onClick={() => setComposerOpen((open) => !open)}><Plus size={16} /> New post</button>
         </div>
       </header>
       <div className="feed-edition">
@@ -53,8 +52,6 @@ export default function FeedPage() {
       </div>
 
       <div className="feed-post-stream">
-        {composerOpen && <CreatePostPage embedded onCancel={() => setComposerOpen(false)} onPosted={() => { setComposerOpen(false); void loadPosts(); }} />}
-
         {loading ? <div className="state-message">Gathering the latest sessions<span className="loading-dots">...</span></div> : null}
         {!loading && error && <div className="state-message state-error" role="alert">{error}<button className="text-button" type="button" onClick={() => void loadPosts()}>Try again</button></div>}
         {!loading && !error && posts.length === 0 && (
@@ -62,10 +59,11 @@ export default function FeedPage() {
             <div className="empty-mark"><span /></div>
             <p className="eyebrow">A CLEAR START</p>
             <h2>The next session<br />starts here.</h2>
-            <button className="button button-secondary" type="button" onClick={() => setComposerOpen(true)}>Share a post <Plus size={16} /></button>
           </div>
         )}
         {!loading && !error && posts.length > 0 && <div className="post-list">{posts.map((post, index) => <PostCard post={post} key={post.id} featured={index === 0} />)}</div>}
+        {composerOpen && <CreatePostPage embedded onCancel={() => setComposerOpen(false)} onPosted={() => { setComposerOpen(false); void loadPosts(); }} />}
+        {!loading && <div className="feed-create-action"><button className="button button-primary" type="button" onClick={() => setComposerOpen((open) => !open)}><Plus size={16} /> {composerOpen ? "Close post composer" : "New post"}</button></div>}
       </div>
     </section>
   );

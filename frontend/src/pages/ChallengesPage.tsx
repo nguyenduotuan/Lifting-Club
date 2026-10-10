@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import { CalendarClock, ChevronRight, Globe2, Pin, Plus, Trophy, Users } from "lucide-react";
 import { createChallenge, getChallenges, getPublicChallenges } from "../api/challenges";
@@ -77,6 +77,7 @@ export default function ChallengesPage() {
   const [members, setMembers] = useState<User[]>([]);
   const [form, setForm] = useState<ChallengeCreateInput>(emptyForm);
   const [showForm, setShowForm] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const [activeCategory, setActiveCategory] = useState<ChallengeCategory>(() => new URLSearchParams(window.location.search).get("category") === "public" ? "public" : "private");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -90,6 +91,10 @@ export default function ChallengesPage() {
     getPublicChallenges("newest", 50).then(setPublicChallenges).catch(() => setPublicChallenges([]));
     getUsers().then(setMembers).catch(() => setMembers([]));
   }, []);
+
+  useEffect(() => {
+    if (showForm) formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [showForm]);
 
   const privateChallenges = useMemo(() => challenges.filter((challenge) => challenge.host_id !== user?.id && !challenge.is_public && ["invited", "accepted"].includes(myMembership(challenge, user?.id)?.status ?? "") && !isPast(challenge.deadline)), [challenges, user]);
   const hosted = useMemo(() => challenges.filter((challenge) => challenge.host_id === user?.id && !isPast(challenge.deadline)), [challenges, user]);
@@ -117,10 +122,10 @@ export default function ChallengesPage() {
   return <section className="page-column challenges-page">
     <header className="page-heading goals-heading">
       <div><p className="eyebrow">BETTER TOGETHER</p><h1>Challenges<span className="heading-period">.</span></h1><p className="goals-intro">Pick an arena, chase the goal, track it side by side.</p></div>
-      <button className="button button-primary" type="button" onClick={() => setShowForm((open) => !open)}><Plus size={16} /> New challenge</button>
+      {activeCategory !== "hosted" && <button className="button button-primary" type="button" onClick={() => setShowForm((open) => !open)}><Plus size={16} /> New challenge</button>}
     </header>
 
-    {showForm && <form className="goal-create-panel" onSubmit={submitChallenge}>
+    {showForm && <form ref={formRef} className="goal-create-panel" onSubmit={submitChallenge}>
       <div className="goal-create-heading"><div><p className="eyebrow">HOST SOMETHING</p><h2>Set the terms of the challenge</h2></div><button className="icon-button" type="button" onClick={() => setShowForm(false)} aria-label="Close challenge form">×</button></div>
       <div className="goal-form-grid">
         <div><label className="field-label" htmlFor="challenge-title">Challenge</label><input id="challenge-title" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="100K meters rowed in May" required maxLength={140} /></div>
@@ -186,5 +191,8 @@ export default function ChallengesPage() {
       <div className="goal-category-heading"><span>Past challenges</span><i /></div>
       <div className="goal-grid">{past.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>
     </section>}
+    {activeCategory === "hosted" && <button className="button button-primary hosted-create-fab" type="button" onClick={() => setShowForm((open) => !open)} aria-expanded={showForm}>
+      {showForm ? "Close challenge form" : <><Plus size={16} /> New challenge</>}
+    </button>}
   </section>;
 }
