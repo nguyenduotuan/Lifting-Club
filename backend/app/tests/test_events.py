@@ -49,6 +49,23 @@ def test_private_event_is_hidden_from_non_invitees(signed_in_client):
     assert signed_in_client.post(f"/api/events/{event_id}/join").status_code == 404
 
 
+def test_private_event_invitee_can_accept_without_public_listing(signed_in_client):
+    add_user("max")
+    response = signed_in_client.post(
+        "/api/events",
+        json={"title": "Invite-only session", "starts_at": future_event_date(), "invites": ["max"]},
+    )
+    assert response.status_code == 201
+    event_id = response.json()["id"]
+    assert signed_in_client.get("/api/events/discover").json() == []
+
+    signed_in_client.post("/api/auth/login", json={"username": "max", "password": "max123"})
+    assert signed_in_client.get(f"/api/events/{event_id}").status_code == 200
+    accepted = signed_in_client.post(f"/api/events/{event_id}/respond", json={"action": "accept"})
+    assert accepted.status_code == 200
+    assert next(person for person in accepted.json()["participants"] if person["username"] == "max")["status"] == "accepted"
+
+
 def test_event_end_must_follow_start(signed_in_client):
     starts_at = future_event_date()
     ends_at = (datetime.now(timezone.utc) + timedelta(days=2)).isoformat()
