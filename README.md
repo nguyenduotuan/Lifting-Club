@@ -1,6 +1,6 @@
-# Lift Club
+# Circuit
 
-A private gym log for a small group of friends. The React frontend talks to a FastAPI REST API; the API stores structured data in SQLite and media files under `backend/uploads/`.
+A shared activity tracker for friends to keep up with events, challenges, and achievements. The React frontend talks to a FastAPI REST API; the API stores structured data in SQLite and media files under `backend/uploads/`.
 
 ## What the app does
 
@@ -178,10 +178,10 @@ The suite covers login and sessions, registration, profiles, posts, and the SQLi
 
 ### Backend with VS Code
 
-Open the `gym-social` directory as the VS Code workspace and select `backend/.venv/bin/python` as the interpreter. The included `.vscode/launch.json` provides the **Lift Club API** configuration.
+Open the `gym-social` directory as the VS Code workspace and select `backend/.venv/bin/python` as the interpreter. The included `.vscode/launch.json` provides the **Circuit API** configuration.
 
 1. Set a breakpoint in a route or service, for example `backend/app/posts/service.py`.
-2. Open **Run and Debug**, select **Lift Club API**, and press F5.
+2. Open **Run and Debug**, select **Circuit API**, and press F5.
 3. Use the frontend in the browser and inspect backend output in the VS Code Debug Console.
 
 The debugger configuration does not use auto-reload, so breakpoints stay attached to the server process. For ordinary development, stop the debugger and run Uvicorn with `--reload` instead. The VS Code Python and Python Debugger extensions are required.

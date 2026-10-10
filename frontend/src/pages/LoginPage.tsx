@@ -38,17 +38,14 @@ export default function LoginPage() {
 
   return (
     <main className="login-page">
-      <div className="login-angel-backdrop" aria-hidden="true">
-        <img src="/images/angel2.jpeg" alt="" />
-      </div>
       <div className="login-sigil" aria-hidden="true"><span /></div>
       <div className="login-atmosphere" aria-hidden="true"><span /><span /><span /></div>
       <div className="login-layout">
         <section className="login-intro">
-          <div className="login-brand"><span className="brand-symbol"><Dumbbell size={20} strokeWidth={1.7} /></span><span>LIFT CLUB</span></div>
-          <p className="eyebrow">YOUR PRIVATE TRAINING CLUB</p>
-          <h1>Show up.<br /><em>Leave a mark.</em></h1>
-          <div className="login-rule"><span />A record of the work, and the people beside you.</div>
+          <div className="login-brand"><span className="brand-symbol"><Dumbbell size={20} strokeWidth={1.7} /></span><span>CIRCUIT</span></div>
+          <p className="eyebrow">MILESTONES, MADE TOGETHER</p>
+          <h1>Make it count.<br /><em>Make it shared.</em></h1>
+          <div className="login-rule"><span />A record of the events, challenges, and wins you share.</div>
         </section>
 
         <form className="login-panel" onSubmit={handleSubmit}>
@@ -60,7 +57,7 @@ export default function LoginPage() {
             <button type="button" className={mode === "login" ? "auth-mode-active" : ""} aria-pressed={mode === "login"} onClick={() => { setMode("login"); setError(""); }}>Log in</button>
             <button type="button" className={mode === "register" ? "auth-mode-active" : ""} aria-pressed={mode === "register"} onClick={() => { setMode("register"); setError(""); }}>Create account</button>
           </div>
-          <h2>{mode === "login" ? "Welcome back" : "Join Lift Club"}</h2>
+          <h2>{mode === "login" ? "Welcome back" : "Join Circuit"}</h2>
           <p className="login-subtitle">{mode === "login" ? "Pick up where you left off." : "Make a place for your next session."}</p>
           {mode === "register" && <>
             <label className="field-label" htmlFor="display-name">Display name</label>

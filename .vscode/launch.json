@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Lift Club API",
+      "name": "Circuit API",
       "type": "debugpy",
       "request": "launch",
       "module": "uvicorn",

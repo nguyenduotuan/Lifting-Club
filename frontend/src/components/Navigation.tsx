@@ -60,9 +60,9 @@ export default function Navigation() {
   return (
     <>
       <header className="mobile-topbar">
-        <Link href="/" className="brand-lockup" aria-label="Lift Club home">
+        <Link href="/" className="brand-lockup" aria-label="Circuit home">
           <span className="brand-symbol"><Dumbbell size={19} strokeWidth={1.7} /></span>
-          <span className="brand-copy"><strong>LIFT CLUB</strong><small>PRIVATE TRAINING CLUB</small></span>
+          <span className="brand-copy"><strong>CIRCUIT</strong><small>SHARED MILESTONES</small></span>
         </Link>
         <button className="icon-button mobile-menu-toggle" type="button" onClick={() => setMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={menuOpen} aria-controls="mobile-navigation" title="Open menu">
           <Menu size={21} />
@@ -70,9 +70,9 @@ export default function Navigation() {
       </header>
       {menuOpen && <button className="mobile-menu-backdrop" type="button" onClick={() => setMenuOpen(false)} aria-label="Close navigation menu" />}
       <aside className={`side-nav${menuOpen ? " side-nav-open" : ""}`} id="mobile-navigation">
-        <Link href="/" className="brand-lockup" aria-label="Lift Club home" onClick={() => setMenuOpen(false)}>
+        <Link href="/" className="brand-lockup" aria-label="Circuit home" onClick={() => setMenuOpen(false)}>
           <span className="brand-symbol"><Dumbbell size={20} strokeWidth={1.7} /></span>
-          <span className="brand-copy"><strong>LIFT CLUB</strong><small>PRIVATE TRAINING CLUB</small></span>
+          <span className="brand-copy"><strong>CIRCUIT</strong><small>SHARED MILESTONES</small></span>
         </Link>
         <button className="icon-button mobile-nav-close" type="button" onClick={() => setMenuOpen(false)} aria-label="Close navigation menu" title="Close menu">
           <X size={19} />
