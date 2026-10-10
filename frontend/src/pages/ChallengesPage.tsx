@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { CalendarClock, ChevronRight, Globe2, Plus, Trophy, Users } from "lucide-react";
-import { createChallenge, getChallenges, getPublicChallenges, joinChallenge, respondToChallenge } from "../api/challenges";
+import { createChallenge, getChallenges, getPublicChallenges, joinChallenge, leaveChallenge, respondToChallenge } from "../api/challenges";
 import { getUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 import MemberPicker from "../components/MemberPicker";
@@ -112,6 +112,17 @@ export default function ChallengesPage() {
     }
   }
 
+  async function leave(challenge: Challenge) {
+    setError("");
+    try {
+      const updated = await leaveChallenge(challenge.id);
+      setChallenges((current) => current.map((item) => item.id === updated.id ? updated : item));
+      setPublicChallenges((current) => current.map((item) => item.id === updated.id ? updated : item));
+    } catch (leaveError) {
+      setError(leaveError instanceof Error ? leaveError.message : "Could not leave this challenge.");
+    }
+  }
+
   async function submitChallenge(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -184,12 +195,14 @@ export default function ChallengesPage() {
 
     {!loading && hosted.length > 0 && <section className="goal-category-section">
       <div className="goal-category-heading"><span>Hosted by you</span><i /></div>
-      <div className="goal-grid">{hosted.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>
+      <div className="goal-grid">{hosted.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} action={myMembership(challenge, user?.id)?.status === "accepted"
+        ? <button className="text-button" type="button" onClick={() => void leave(challenge)}>Leave challenge</button>
+        : <button className="button button-secondary" type="button" onClick={() => void join(challenge)}>Rejoin challenge</button>} />)}</div>
     </section>}
 
     {!loading && joined.length > 0 && <section className="goal-category-section">
       <div className="goal-category-heading"><span>Challenges you joined</span><i /></div>
-      <div className="goal-grid">{joined.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} />)}</div>
+      <div className="goal-grid">{joined.map((challenge) => <ChallengeCard key={challenge.id} challenge={challenge} userId={user?.id} action={<button className="text-button" type="button" onClick={() => void leave(challenge)}>Leave challenge</button>} />)}</div>
     </section>}
 
     {!loading && publicChallenges.some((challenge) => {

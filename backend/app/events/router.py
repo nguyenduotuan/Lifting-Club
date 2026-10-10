@@ -126,19 +126,30 @@ def get_event(event_id: int, db: Session = Depends(get_db), user: User = Depends
 @router.post("/{event_id}/join", response_model=EventRead)
 def join_event(event_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> EventRead:
     event = db.scalar(event_query().where(Event.id == event_id).with_for_update())
-    if event is None or not event.is_public:
+    if event is None or (not event.is_public and event.host_id != user.id):
         raise HTTPException(status_code=404, detail="Public event not found.")
     if not event_is_active(event):
         raise HTTPException(status_code=409, detail="This event has ended.")
     participant = next((person for person in event.participants if person.user_id == user.id), None)
     if participant is not None and participant.status == "accepted":
         return serialize(event)
-    if pending_capacity(event) >= event.max_participants and (participant is None or participant.status != "invited"):
+    if event.max_participants is not None and pending_capacity(event) >= event.max_participants and (participant is None or participant.status != "invited"):
         raise HTTPException(status_code=409, detail="This event is full.")
     if participant is None:
         event.participants.append(EventParticipant(user_id=user.id, status="accepted"))
     else:
         participant.status = "accepted"
+    db.commit()
+    return serialize(get_accessible_event(db, event_id, user))
+
+
+@router.delete("/{event_id}/join", response_model=EventRead)
+def leave_event(event_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> EventRead:
+    event = get_accessible_event(db, event_id, user, lock=True)
+    participant = next((person for person in event.participants if person.user_id == user.id), None)
+    if participant is None or participant.status != "accepted":
+        raise HTTPException(status_code=409, detail="You are not attending this event.")
+    participant.status = "declined"
     db.commit()
     return serialize(get_accessible_event(db, event_id, user))
 

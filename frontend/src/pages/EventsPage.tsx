@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarClock, Globe2, MapPin, Plus, Trash2, Users } from "lucide-react";
-import { createEvent, deleteEvent, getEvents, getPublicEvents, joinEvent, respondToEvent } from "../api/events";
+import { createEvent, deleteEvent, getEvents, getPublicEvents, joinEvent, leaveEvent, respondToEvent } from "../api/events";
 import { getUsers } from "../api/users";
 import MemberPicker from "../components/MemberPicker";
 import { useAuth } from "../hooks/useAuth";
@@ -109,6 +109,10 @@ export default function EventsPage() {
     }
   }
 
+  async function updateAttendance(event: ClubEvent, action: "join" | "leave") {
+    await runEventAction(event, () => action === "join" ? joinEvent(event.id) : leaveEvent(event.id));
+  }
+
   async function submitEvent(submitEvent: React.FormEvent<HTMLFormElement>) {
     submitEvent.preventDefault();
     setError("");
@@ -190,11 +194,16 @@ export default function EventsPage() {
     </section>}
     {!loading && hosted.length > 0 && <section className="goal-category-section">
       <div className="goal-category-heading"><span>Hosted by you</span><i /></div>
-      <div className="goal-grid">{hosted.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={<button className="icon-button event-delete" type="button" disabled={busyEventId === event.id} onClick={() => void removeEvent(event)} aria-label={`Delete ${event.title}`} title="Delete event"><Trash2 size={15} /></button>} />)}</div>
+      <div className="goal-grid">{hosted.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={<>
+        {membership(event, user?.id)?.status === "accepted"
+          ? <button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "leave")}>Leave event</button>
+          : <button className="button button-secondary" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "join")}>Rejoin event</button>}
+        <button className="icon-button event-delete" type="button" disabled={busyEventId === event.id} onClick={() => void removeEvent(event)} aria-label={`Delete ${event.title}`} title="Delete event"><Trash2 size={15} /></button>
+      </>} />)}</div>
     </section>}
     {!loading && joined.length > 0 && <section className="goal-category-section">
       <div className="goal-category-heading"><span>Events you joined</span><i /></div>
-      <div className="goal-grid">{joined.map((event) => <EventCard key={event.id} event={event} userId={user?.id} />)}</div>
+      <div className="goal-grid">{joined.map((event) => <EventCard key={event.id} event={event} userId={user?.id} action={<button className="text-button" type="button" disabled={busyEventId === event.id} onClick={() => void updateAttendance(event, "leave")}>Leave event</button>} />)}</div>
     </section>}
     {!loading && discover.length > 0 && <section className="goal-category-section">
       <div className="goal-category-heading"><span>Public events</span><i /></div>

@@ -44,3 +44,17 @@ def test_private_challenges_remain_invite_only_and_unlisted(signed_in_client):
     signed_in_client.post("/api/auth/login", json={"username": "max", "password": "max123"})
     assert signed_in_client.get(f"/api/challenges/{challenge_id}").status_code == 404
     assert signed_in_client.post(f"/api/challenges/{challenge_id}/join").status_code == 404
+
+
+def test_participant_can_leave_and_rejoin_public_challenge(signed_in_client):
+    challenge = signed_in_client.post(
+        "/api/challenges",
+        json={"title": "Train together", "is_public": True, "max_participants": 3},
+    ).json()
+    challenge_id = challenge["id"]
+    left = signed_in_client.delete(f"/api/challenges/{challenge_id}/join")
+    assert left.status_code == 200
+    assert next(person for person in left.json()["participants"] if person["user_id"] == 1)["status"] == "declined"
+    rejoined = signed_in_client.post(f"/api/challenges/{challenge_id}/join")
+    assert rejoined.status_code == 200
+    assert next(person for person in rejoined.json()["participants"] if person["user_id"] == 1)["status"] == "accepted"

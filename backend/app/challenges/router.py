@@ -157,7 +157,7 @@ def join_challenge(
     user: User = Depends(get_current_user),
 ) -> ChallengeRead:
     challenge = db.scalar(challenge_query().where(Challenge.id == challenge_id).with_for_update())
-    if challenge is None or not challenge.is_public:
+    if challenge is None or (not challenge.is_public and challenge.host_id != user.id):
         raise HTTPException(status_code=404, detail="Public challenge not found.")
     if challenge.deadline is not None:
         deadline = challenge.deadline.replace(tzinfo=timezone.utc) if challenge.deadline.tzinfo is None else challenge.deadline
@@ -174,6 +174,21 @@ def join_challenge(
         challenge.participants.append(ChallengeParticipant(user_id=user.id, status="accepted"))
     else:
         participant.status = "accepted"
+    db.commit()
+    return serialize(get_accessible_challenge(db, challenge_id, user))
+
+
+@router.delete("/{challenge_id}/join", response_model=ChallengeRead)
+def leave_challenge(
+    challenge_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> ChallengeRead:
+    challenge = get_accessible_challenge(db, challenge_id, user, lock=True)
+    participant = get_participant(challenge, user)
+    if participant is None or participant.status != "accepted":
+        raise HTTPException(status_code=409, detail="You are not participating in this challenge.")
+    participant.status = "declined"
     db.commit()
     return serialize(get_accessible_challenge(db, challenge_id, user))
 

@@ -21,6 +21,10 @@ export function joinChallenge(challengeId: number): Promise<Challenge> {
   return request<Challenge>(`/challenges/${challengeId}/join`, { method: "POST" });
 }
 
+export function leaveChallenge(challengeId: number): Promise<Challenge> {
+  return request<Challenge>(`/challenges/${challengeId}/join`, { method: "DELETE" });
+}
+
 export function inviteToChallenge(challengeId: number, usernames: string[]): Promise<Challenge> {
   return request<Challenge>(`/challenges/${challengeId}/invite`, jsonBody({ usernames }));
 }

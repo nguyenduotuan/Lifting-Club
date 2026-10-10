@@ -17,6 +17,10 @@ export function joinEvent(eventId: number): Promise<ClubEvent> {
   return request<ClubEvent>(`/events/${eventId}/join`, { method: "POST" });
 }
 
+export function leaveEvent(eventId: number): Promise<ClubEvent> {
+  return request<ClubEvent>(`/events/${eventId}/join`, { method: "DELETE" });
+}
+
 export function inviteToEvent(eventId: number, usernames: string[]): Promise<ClubEvent> {
   return request<ClubEvent>(`/events/${eventId}/invite`, jsonBody({ usernames }));
 }

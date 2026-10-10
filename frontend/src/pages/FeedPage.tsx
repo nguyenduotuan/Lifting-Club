@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
 import { Plus, RotateCw } from "lucide-react";
+import { getChallenges } from "../api/challenges";
+import { getEvents } from "../api/events";
 import { getPosts } from "../api/posts";
+import EventCalendar from "../components/EventCalendar";
 import PostCard from "../components/PostCard";
+import { useAuth } from "../hooks/useAuth";
 import CreatePostPage from "./CreatePostPage";
+import type { Challenge } from "../types/challenge";
+import type { ClubEvent } from "../types/event";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import type { Post } from "../types/post";
 
 export default function FeedPage() {
+  const { user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<ClubEvent[]>([]);
+  const [calendarChallenges, setCalendarChallenges] = useState<Challenge[]>([]);
+  const [calendarLoading, setCalendarLoading] = useState(true);
+  const [calendarError, setCalendarError] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [composerOpen, setComposerOpen] = useState(false);
@@ -25,6 +36,25 @@ export default function FeedPage() {
   }
 
   useEffect(() => { void loadPosts(); }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    Promise.allSettled([getEvents(), getChallenges()]).then(([eventsResult, challengesResult]) => {
+      if (!active) return;
+      const events = eventsResult.status === "fulfilled" ? eventsResult.value : [];
+      const challenges = challengesResult.status === "fulfilled" ? challengesResult.value : [];
+      setCalendarEvents(events.filter((event) => event.participants.some((participant) => participant.user_id === user.id && participant.status === "accepted")));
+      setCalendarChallenges(challenges.filter((challenge) => challenge.participants.some((participant) => participant.user_id === user.id && participant.status === "accepted")));
+      setCalendarError(eventsResult.status === "rejected" && challengesResult.status === "rejected"
+        ? "Your schedule could not be loaded."
+        : eventsResult.status === "rejected" || challengesResult.status === "rejected"
+          ? "Some scheduled items could not be loaded."
+          : "");
+      setCalendarLoading(false);
+    });
+    return () => { active = false; };
+  }, [user?.id]);
 
   const { pullDistance, refreshing, triggerDistance } = usePullToRefresh(() => loadPosts({ background: true }));
 
@@ -51,6 +81,15 @@ export default function FeedPage() {
         <div><strong>Training, in motion.</strong><span>Recent work from your circle, all in one place.</span></div>
         <span className="feed-edition-count">{posts.length} {posts.length === 1 ? "POST" : "POSTS"}</span>
       </div>
+      <section className="feed-calendar-panel" aria-labelledby="feed-calendar-title">
+        <header className="feed-calendar-header">
+          <div><p className="eyebrow">YOUR SCHEDULE</p><h2 id="feed-calendar-title">Events &amp; challenge deadlines</h2></div>
+          {!calendarLoading && <span>{calendarEvents.length + calendarChallenges.filter((challenge) => challenge.deadline).length} DATED</span>}
+        </header>
+        {calendarLoading && <div className="state-message">Loading your schedule<span className="loading-dots">...</span></div>}
+        {!calendarLoading && calendarError && <p className="feed-calendar-message" role="status">{calendarError}</p>}
+        {!calendarLoading && <EventCalendar events={calendarEvents} challenges={calendarChallenges} />}
+      </section>
 
       {composerOpen && <CreatePostPage embedded onCancel={() => setComposerOpen(false)} onPosted={() => { setComposerOpen(false); void loadPosts(); }} />}
 

@@ -74,3 +74,17 @@ def test_event_end_must_follow_start(signed_in_client):
         json={"title": "Invalid event", "starts_at": starts_at, "ends_at": ends_at},
     )
     assert response.status_code == 422
+
+
+def test_participant_can_leave_and_rejoin_private_event(signed_in_client):
+    event = signed_in_client.post(
+        "/api/events",
+        json={"title": "Private lift", "starts_at": future_event_date()},
+    ).json()
+    event_id = event["id"]
+    left = signed_in_client.delete(f"/api/events/{event_id}/join")
+    assert left.status_code == 200
+    assert next(person for person in left.json()["participants"] if person["user_id"] == 1)["status"] == "declined"
+    rejoined = signed_in_client.post(f"/api/events/{event_id}/join")
+    assert rejoined.status_code == 200
+    assert next(person for person in rejoined.json()["participants"] if person["user_id"] == 1)["status"] == "accepted"
