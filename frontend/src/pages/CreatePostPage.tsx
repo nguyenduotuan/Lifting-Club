@@ -92,7 +92,7 @@ export default function CreatePostPage() {
     setSubmitting(true);
     try {
       await createPost(formData);
-      setLocation("/");
+      setLocation("/feed");
     } catch (createError) {
       setError(createError instanceof Error ? createError.message : "Post could not be created.");
     } finally {
@@ -102,8 +102,8 @@ export default function CreatePostPage() {
 
   return (
     <section className="page-column create-page">
-      <Link className="back-link" href="/"><ArrowLeft size={16} /> Back to FYP</Link>
-      <header className="page-heading create-heading"><div><p className="eyebrow">LOG THE SESSION</p><h1>New post<span className="heading-period">.</span></h1></div></header>
+      <Link className="back-link" href="/feed"><ArrowLeft size={16} /> Back to FYP</Link>
+      <header className="page-heading create-heading"><div><p className="eyebrow">LOG THE SESSION</p><h1>Post<span className="heading-period">.</span></h1></div></header>
 
       <form className="create-form" onSubmit={handleSubmit}>
         <label className="field-label" htmlFor="caption">Caption <span>OPTIONAL</span></label>

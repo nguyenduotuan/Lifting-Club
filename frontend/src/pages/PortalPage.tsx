@@ -1,4 +1,4 @@
-import { Activity, ArrowUpRight, Flag, Plus, Trophy, UserRound } from "lucide-react";
+import { Activity, ArrowUpRight, Bell, CalendarDays, Flag, Plus, Trophy, UserRound } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "../hooks/useAuth";
 
@@ -8,8 +8,10 @@ export default function PortalPage() {
     { href: "/feed", number: "01", label: "FYP", description: "Catch up on what your circle is sharing.", icon: Activity },
     { href: "/challenges", number: "02", label: "Challenges", description: "See what's in motion and take part.", icon: Trophy },
     { href: "/goals", number: "03", label: "Goals & milestones", description: "Keep track of progress and celebrate wins.", icon: Flag },
-    { href: "/create", number: "04", label: "Share an update", description: "Add a moment, session, or small victory.", icon: Plus },
-    { href: `/profile/${user?.username ?? ""}`, number: "05", label: "Your profile", description: "Revisit your posts and personal progress.", icon: UserRound },
+    { href: "/events", number: "04", label: "Events", description: "Find plans and moments with your circle.", icon: CalendarDays },
+    { href: "/notifications", number: "05", label: "Notifications", description: "See invitations waiting for your response.", icon: Bell },
+    { href: "/create", number: "06", label: "Post", description: "Add a moment, session, or small victory.", icon: Plus },
+    { href: `/profile/${user?.username ?? ""}`, number: "07", label: "Your profile", description: "Revisit your posts and personal progress.", icon: UserRound },
   ];
 
   return (

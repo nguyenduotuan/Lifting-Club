@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Activity, CircleUserRound, Dumbbell, Flag, Home, LogOut, Menu, Plus, Search, Trophy, X } from "lucide-react";
+import { Activity, Bell, CalendarDays, CircleUserRound, Dumbbell, Flag, Home, LogOut, Menu, Plus, Search, Trophy, X } from "lucide-react";
 import { getUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 import type { User } from "../types/user";
@@ -86,7 +86,7 @@ export default function Navigation() {
             <Activity size={19} strokeWidth={1.8} /><span>FYP</span>
           </Link>
           <Link href="/create" className={`nav-item${location === "/create" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
-            <Plus size={19} strokeWidth={1.8} /><span>Create</span>
+            <Plus size={19} strokeWidth={1.8} /><span>Post</span>
           </Link>
           <Link href="/goals" className={`nav-item${location === "/goals" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
             <Flag size={19} strokeWidth={1.8} /><span>Goals</span>
@@ -94,8 +94,11 @@ export default function Navigation() {
           <Link href="/challenges" className={`nav-item${location.startsWith("/challenges") ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
             <Trophy size={19} strokeWidth={1.8} /><span>Challenges</span>
           </Link>
-          <Link href={`/profile/${user.username}`} className={`nav-item${location.startsWith("/profile") ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
-            <CircleUserRound size={19} strokeWidth={1.8} /><span>Profile</span>
+          <Link href="/events" className={`nav-item${location === "/events" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
+            <CalendarDays size={19} strokeWidth={1.8} /><span>Events</span>
+          </Link>
+          <Link href="/notifications" className={`nav-item${location === "/notifications" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
+            <Bell size={19} strokeWidth={1.8} /><span>Notifications</span>
           </Link>
         </nav>
 
@@ -118,8 +121,10 @@ export default function Navigation() {
         </section>
 
         <div className="nav-account">
-          <Avatar username={user.username} displayName={user.display_name} image={user.profile_image} />
-          <div className="nav-account-copy"><strong>{user.display_name}</strong><span>@{user.username}</span></div>
+          <Link href={`/profile/${user.username}`} className="nav-account-profile" onClick={() => setMenuOpen(false)} aria-label={`View ${user.display_name}'s profile`}>
+            <Avatar username={user.username} displayName={user.display_name} image={user.profile_image} />
+            <span className="nav-account-copy"><strong>{user.display_name}</strong><span>@{user.username}</span></span>
+          </Link>
           <button className="icon-button nav-logout" type="button" onClick={handleSignOut} aria-label="Log out" title="Log out">
             <LogOut size={17} />
           </button>
@@ -133,7 +138,13 @@ export default function Navigation() {
           <Activity size={19} strokeWidth={1.8} /><span>FYP</span>
         </Link>
         <Link href="/create" className={`mobile-bottom-nav-item${location === "/create" ? " mobile-bottom-nav-item-active" : ""}`}>
-          <Plus size={21} strokeWidth={1.8} /><span>Create</span>
+          <Plus size={21} strokeWidth={1.8} /><span>Post</span>
+        </Link>
+        <Link href="/events" className={`mobile-bottom-nav-item${location === "/events" ? " mobile-bottom-nav-item-active" : ""}`}>
+          <CalendarDays size={18} strokeWidth={1.8} /><span>Events</span>
+        </Link>
+        <Link href="/challenges" className={`mobile-bottom-nav-item${location.startsWith("/challenges") ? " mobile-bottom-nav-item-active" : ""}`}>
+          <Trophy size={18} strokeWidth={1.8} /><span>Challenges</span>
         </Link>
         <Link href={`/profile/${user.username}`} className={`mobile-bottom-nav-item${location.startsWith("/profile") ? " mobile-bottom-nav-item-active" : ""}`}>
           <CircleUserRound size={19} strokeWidth={1.8} /><span>Profile</span>
