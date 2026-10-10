@@ -9,6 +9,7 @@ from starlette.responses import FileResponse
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.auth.router import router as auth_router
+from app.challenges.router import router as challenges_router
 from app.config.settings import settings
 from app.database.database import Base, engine
 from app.database.migrations import migrate_lift_weights, migrate_post_activity, migrate_user_profile_image
@@ -43,13 +44,14 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[origin.strip() for origin in settings.cors_origins.split(",") if origin.strip()],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "DELETE"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["Content-Type"],
 )
 app.include_router(auth_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
 app.include_router(posts_router, prefix="/api")
 app.include_router(goals_router, prefix="/api")
+app.include_router(challenges_router, prefix="/api")
 app.get("/api/health", tags=["health"])(lambda: {"status": "ok"})
 app.mount("/uploads", StaticFiles(directory=settings.upload_dir, check_dir=False), name="uploads")
 

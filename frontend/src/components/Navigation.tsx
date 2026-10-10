@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Activity, CircleUserRound, Dumbbell, Flag, Home, LogOut, Menu, Plus, Search, X } from "lucide-react";
+import { Activity, CircleUserRound, Dumbbell, Flag, Home, LogOut, Menu, Plus, Search, Trophy, X } from "lucide-react";
 import { getUsers } from "../api/users";
 import { useAuth } from "../hooks/useAuth";
 import type { User } from "../types/user";
@@ -87,6 +87,9 @@ export default function Navigation() {
           </Link>
           <Link href="/goals" className={`nav-item${location === "/goals" ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
             <Flag size={19} strokeWidth={1.8} /><span>Goals</span>
+          </Link>
+          <Link href="/challenges" className={`nav-item${location.startsWith("/challenges") ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
+            <Trophy size={19} strokeWidth={1.8} /><span>Challenges</span>
           </Link>
           <Link href={`/profile/${user.username}`} className={`nav-item${location.startsWith("/profile") ? " nav-item-active" : ""}`} onClick={() => setMenuOpen(false)}>
             <CircleUserRound size={19} strokeWidth={1.8} /><span>Profile</span>

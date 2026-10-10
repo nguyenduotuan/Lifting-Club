@@ -147,3 +147,40 @@ class GoalUpdate(Base):
     body: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     goal: Mapped[Goal] = relationship(back_populates="updates")
+
+
+class Challenge(Base):
+    __tablename__ = "challenges"
+    __table_args__ = (
+        CheckConstraint("target_value IS NULL OR target_value > 0", name="ck_challenges_target_positive"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    host_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(140))
+    description: Mapped[str] = mapped_column(Text, default="")
+    target_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+    unit: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    deadline: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
+    host: Mapped[User] = relationship()
+    participants: Mapped[list["ChallengeParticipant"]] = relationship(
+        back_populates="challenge", cascade="all, delete-orphan", order_by="ChallengeParticipant.id"
+    )
+
+
+class ChallengeParticipant(Base):
+    __tablename__ = "challenge_participants"
+    __table_args__ = (
+        UniqueConstraint("challenge_id", "user_id", name="uq_challenge_participants_user"),
+        CheckConstraint("current_value >= 0", name="ck_challenge_participants_nonnegative"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    challenge_id: Mapped[int] = mapped_column(ForeignKey("challenges.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    status: Mapped[str] = mapped_column(String(20), default="invited")
+    current_value: Mapped[float] = mapped_column(Float, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    challenge: Mapped[Challenge] = relationship(back_populates="participants")
+    user: Mapped[User] = relationship()

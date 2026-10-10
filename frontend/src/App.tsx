@@ -2,6 +2,8 @@ import { useEffect, type ReactNode } from "react";
 import { Route, Switch, useLocation } from "wouter";
 import Navigation from "./components/Navigation";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
+import ChallengeDetailPage from "./pages/ChallengeDetailPage";
+import ChallengesPage from "./pages/ChallengesPage";
 import CreatePostPage from "./pages/CreatePostPage";
 import FeedPage from "./pages/FeedPage";
 import GoalsPage from "./pages/GoalsPage";
@@ -41,6 +43,8 @@ function AppRoutes() {
       <Route path="/login"><LoginRoute /></Route>
       <Route path="/create"><RequireAuth><CreatePostPage /></RequireAuth></Route>
       <Route path="/goals"><RequireAuth><GoalsPage /></RequireAuth></Route>
+      <Route path="/challenges"><RequireAuth><ChallengesPage /></RequireAuth></Route>
+      <Route path="/challenges/:id"><RequireAuth><ChallengeDetailPage /></RequireAuth></Route>
       <Route path="/profile"><RequireAuth><ProfileRedirect /></RequireAuth></Route>
       <Route path="/profile/:username"><RequireAuth><ProfilePage /></RequireAuth></Route>
       <Route path="/"><RequireAuth><FeedPage /></RequireAuth></Route>

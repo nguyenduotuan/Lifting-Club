@@ -247,3 +247,33 @@
   .login-panel { padding: 26px 21px 22px; }
   .login-signature span:last-child { max-width: 100px; text-align: right; }
 }
+
+/* Challenges */
+.challenge-card .challenge-deadline { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; letter-spacing: .06em; color: rgba(219, 222, 229, .6); }
+.challenge-card-past { opacity: .72; }
+.challenge-title-link { text-decoration: none; color: inherit; }
+.challenge-title-link:hover h2 { text-decoration: underline; text-underline-offset: 3px; }
+.challenge-card-action { display: flex; align-items: center; gap: 14px; margin-top: 13px; }
+.challenge-invite-picker { margin-top: 14px; }
+.challenge-invite-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 8px; }
+.challenge-invite-option { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid rgba(219, 222, 229, .13); border-radius: 6px; font-size: 13px; cursor: pointer; }
+.challenge-invite-option input { accent-color: inherit; }
+.challenge-invite-selected { border-color: rgba(219, 222, 229, .45); background: rgba(219, 222, 229, .07); }
+.challenge-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 18px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; color: rgba(219, 222, 229, .6); }
+.challenge-back:hover { color: inherit; }
+.challenge-delete { align-self: flex-start; }
+.challenge-facts strong { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; }
+.challenge-invite-banner { margin-bottom: 18px; }
+.challenge-invite-banner p { margin: 0; }
+.challenge-progress-panel { margin-bottom: 22px; }
+.challenge-leaderboard { display: flex; flex-direction: column; gap: 10px; }
+.challenge-standing { display: flex; align-items: center; gap: 12px; animation: none; }
+.challenge-standing-you { border-color: rgba(219, 222, 229, .4); }
+.challenge-rank { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; font-size: 13px; letter-spacing: .05em; }
+.challenge-standing-copy { flex: 1; min-width: 0; }
+.challenge-standing-copy strong { display: block; font-size: 14px; }
+.challenge-standing-copy small { color: rgba(219, 222, 229, .55); font-weight: 400; }
+.challenge-standing-copy .goal-progress-track { margin-top: 7px; }
+.challenge-standing-value { font-size: 13px; white-space: nowrap; color: rgba(219, 222, 229, .75); }
+.challenge-invite-panel .button { margin-top: 13px; display: inline-flex; align-items: center; gap: 7px; }
+.challenge-pending { font-size: 13px; color: rgba(219, 222, 229, .6); }
